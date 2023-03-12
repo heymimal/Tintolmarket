@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import tintolmarket.domain.Operacao;
 
 public class Client {
 	private String username;
@@ -42,7 +43,8 @@ public class Client {
 	
 	public void addwine(String winename, String wineimage) { //throws para ver + void -> String
 		try {
-			this.out.writeObject("add");
+			
+			this.out.writeObject(Operacao.ADD);
 			boolean b = (boolean) this.in.readObject();
 			if (b) {
 				System.out.println("pedido reconhecido");
@@ -61,7 +63,7 @@ public class Client {
 
 	public void sellwine(String winename, int winevalue, int winequantity) {
 		try {
-			this.out.writeObject("sell");
+			this.out.writeObject(Operacao.SELL);
 			boolean b = (boolean) this.in.readObject();
 			if (b) {
 				System.out.println("pedido reconhecido");
@@ -81,16 +83,18 @@ public class Client {
 
 	public void read() {
 		// LER MENSAGENS
+		//this.out.writeObject(Operacao.READ);
 	}
 
 	public void talk(String username2, String message) {
 		// MANDAR MENSAGENS
+		//this.out.writeObject(Operacao.TALK);
 		
 	}
 
 	public void classify(String winename, int stars) {
 		try {
-			this.out.writeObject("classify");
+			this.out.writeObject(Operacao.CLASSIFY);
 			boolean b = (boolean) this.in.readObject();
 			if (b) {
 				System.out.println("pedido reconhecido");
@@ -110,12 +114,13 @@ public class Client {
 
 	public void wallet() {
 		// PARA O SERVIDOR - LATER
+		//this.out.writeObject(Operacao.WALLET);
 		
 	}
 
 	public void buy(String winename, String wineseller, int winequantity) {
 		try {
-			this.out.writeObject("buy");
+			this.out.writeObject(Operacao.BUY);
 			boolean b = (boolean) this.in.readObject();
 			if (b) {
 				System.out.println("pedido reconhecido");
@@ -136,7 +141,7 @@ public class Client {
 
 	public void view(String winename) {
 		try {
-			this.out.writeObject("view");
+			this.out.writeObject(Operacao.VIEW);
 			boolean b = (boolean) this.in.readObject();
 			if (b) {
 				System.out.println("pedido reconhecido");
