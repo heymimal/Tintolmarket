@@ -8,6 +8,7 @@ import java.net.Socket;
 public class ServerThread extends Thread {
 
 	private Socket socket = null;
+	//will have mutex for access to .txt files and possibly others
 
 	public ServerThread(Socket inSoc) {
 		socket = inSoc;
@@ -25,6 +26,7 @@ public class ServerThread extends Thread {
 			try {
 				user = (String)inStream.readObject();
 				passwd = (String)inStream.readObject();
+				
 				System.out.println("thread: depois de receber a password e o user");
 				if (user.length() != 0){
 					System.out.println("yes");
