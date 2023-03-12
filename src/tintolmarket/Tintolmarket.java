@@ -1,3 +1,5 @@
+package tintolmarket;
+
 import java.util.Scanner;
 
 import tintolmarket.client.Client;
