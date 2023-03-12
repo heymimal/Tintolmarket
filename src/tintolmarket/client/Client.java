@@ -23,7 +23,7 @@ public class Client {
 		
 	}
 	
-	public Boolean connect() {
+	public Boolean connect() {//will receive values
 		try {
 			this.clientSocket = new Socket(InetAddress.getLocalHost(),12345);
 			this.out = new ObjectOutputStream(clientSocket.getOutputStream());
