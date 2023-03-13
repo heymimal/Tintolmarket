@@ -83,7 +83,7 @@ public class ServerThread extends Thread {
 						outStream.writeObject(true);
 						System.out.println("Funcao ADD");
 						String winename = (String) inStream.readObject();
-						String wineimage = (String) inStream.readObject();
+						String wineimage = (String) inStream.readObject(); //not like this
 						if(wineExists(winename, Server.wines)) {
 							System.out.println("Vinho já tinha sido adicionado");
 						}else {
