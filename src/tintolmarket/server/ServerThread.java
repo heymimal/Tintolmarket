@@ -1,6 +1,7 @@
 package tintolmarket.server;
 import tintolmarket.domain.*;
 
+//import tintolmarket.server.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -51,31 +52,17 @@ public class ServerThread extends Thread {
 						System.out.println("Funcao ADD");
 						String winename = (String) inStream.readObject();
 						String wineimage = (String) inStream.readObject();
-						File winefile = new File("wines.txt");
-						winefile.createNewFile();
-						FileReader fr = new FileReader(winefile);
-						BufferedReader br = new BufferedReader(fr);
-						FileWriter fw = new FileWriter(winefile, true);
-						BufferedWriter bw = new BufferedWriter(fw);
-						String check;
-						Boolean found = false;
-						while((check = br.readLine()) != null) {
-							String[] wineInfo = check.split(":");
-							if(wineInfo[0].equals(winename)) {
-								found = true;
-								System.out.println("Vinho já tinha sido adicionado");
-								break;
-							}
-						}
-						if(!found) {
+						if(wineExists(winename, Server.wines)) {
+							System.out.println("Vinho já tinha sido adicionado");
+						}else {
+							FileWriter fw = new FileWriter(Server.wines, true);
+							BufferedWriter bw = new BufferedWriter(fw);
 							bw.write(winename+":"+" "+":");
 							bw.newLine();
+							bw.close();
+							fw.close();
 							System.out.println("Vinho adicionado!");
 						}
-						fr.close();
-						br.close();
-						fw.close();
-						bw.close();
 						break;
 					}case BUY:{
 						outStream.writeObject(true);
