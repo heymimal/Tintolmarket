@@ -45,7 +45,7 @@ public class Client {
 		try {
 			
 			this.out.writeObject(Operacao.ADD);
-			boolean b = (boolean) this.in.readObject();
+			/*boolean b = (boolean) this.in.readObject();
 			if (b) {
 				System.out.println("pedido reconhecido");
 				this.out.writeObject(winename);
@@ -54,8 +54,8 @@ public class Client {
 				// devolve erro se já existir
 			} else {
 				System.out.println("erro no servidor");
-			}
-		} catch (IOException | ClassNotFoundException e) {
+			}*/
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		

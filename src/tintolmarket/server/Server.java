@@ -8,7 +8,7 @@ import java.net.Socket;
 
 public class Server {
 	public static void main(String[] args) {
-		System.out.println("servidor: main");
+		System.out.println("servidor: main tintol");
 		Server server = new Server();
 		server.startServer();
 	}

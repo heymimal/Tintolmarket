@@ -1,5 +1,5 @@
 package tintolmarket.server;
-
+import tintolmarket.domain.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -8,6 +8,7 @@ import java.net.Socket;
 public class ServerThread extends Thread {
 
 	private Socket socket = null;
+	private Operacao op;
 	//will have mutex for access to .txt files and possibly others
 
 	public ServerThread(Socket inSoc) {
@@ -33,6 +34,29 @@ public class ServerThread extends Thread {
 					System.out.println(user);
 					System.out.println(passwd);
 					outStream.writeObject(new Boolean(true));
+				}
+				
+				this.op = (Operacao)inStream.readObject();
+				switch(this.op) {
+				case ADD:
+					System.out.println("Funcao ADD");
+					break;
+				case BUY:
+					break;
+				case CLASSIFY:
+					break;
+				case READ:
+					break;
+				case SELL:
+					break;
+				case TALK:
+					break;
+				case VIEW:
+					break;
+				case WALLET:
+					break;
+				default:
+					break;
 				}
 			} catch (IOException e1) {
 						e1.printStackTrace();

@@ -21,9 +21,11 @@ public class Tintolmarket{
 	// depois de fazer conect, dar display das operações possiveis e começar a fazer
 	Scanner sc = new Scanner(System.in);
 	System.out.println("Hello!");
+	System.out.print("insere: ");
 	boolean b = true;
 	while(b) {
 		String command = sc.next();
+		System.out.println(command);
 		switch(command) {
 		case "a":
 		case "add":{
@@ -31,7 +33,6 @@ public class Tintolmarket{
 			String wineimage = sc.next();
 			System.out.println("adding "+ winename + "with the image "+ wineimage);
 			c.addwine(winename,wineimage);
-			
 			break;
 		}
 		case "s":
@@ -90,6 +91,8 @@ public class Tintolmarket{
 		}
 		case "e":
 			b = false;
+			break;
+		default:
 			break;
 	}
 	}
