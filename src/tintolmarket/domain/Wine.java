@@ -1,6 +1,6 @@
 package tintolmarket.domain;
 
-import tintolmarket.client.Client;
+
 
 public class Wine {
 	private String name;

@@ -7,14 +7,14 @@ import java.net.InetAddress;
 import java.net.Socket;
 import tintolmarket.domain.Operacao;
 
-public class Client {
+public class Client_stub {
 	private String username;
 	private String pass;
 	private Socket clientSocket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 
-	public Client(String username, String pass) {
+	public Client_stub(String username, String pass) {
 		//criar estruturas para conexão com servidor
 		//enviar username e pass para servidor
 		setUsername(username);
@@ -45,7 +45,7 @@ public class Client {
 		try {
 			
 			this.out.writeObject(Operacao.ADD);
-			/*boolean b = (boolean) this.in.readObject();
+			boolean b = (boolean) this.in.readObject();
 			if (b) {
 				System.out.println("pedido reconhecido");
 				this.out.writeObject(winename);
@@ -54,8 +54,8 @@ public class Client {
 				// devolve erro se já existir
 			} else {
 				System.out.println("erro no servidor");
-			}*/
-		} catch (IOException e) {
+			}
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 		

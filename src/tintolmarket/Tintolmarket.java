@@ -2,10 +2,10 @@ package tintolmarket;
 
 import java.util.Scanner;
 
-import tintolmarket.client.Client;
+import tintolmarket.client.Client_stub;
 
 public class Tintolmarket{
-	public static Client c; //Conechao
+	public static Client_stub c; //Conechao
 	
 	public static void main(String[] args) {
 		
@@ -13,10 +13,10 @@ public class Tintolmarket{
 	String pass = "pass";
 	
 	//Se nao recebemos pass, pedir
-	c = new Client(username, pass);
+	c = new Client_stub(username, pass);
 	if(!c.connect()) {
 		System.out.println("erro");
-	}
+	} else {
 	System.out.println("passou sem errar");
 	// depois de fazer conect, dar display das operações possiveis e começar a fazer
 	Scanner sc = new Scanner(System.in);
@@ -96,7 +96,7 @@ public class Tintolmarket{
 			break;
 	}
 	}
-
+	}
 }
 
 }
