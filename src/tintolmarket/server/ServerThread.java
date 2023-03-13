@@ -4,6 +4,7 @@ import tintolmarket.domain.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -102,21 +103,13 @@ public class ServerThread extends Thread {
 										} else {
 											int custo = quantity*Integer.valueOf(uservalues[2]);
 											System.out.println("checking wallet");
-											File wallet = new File("wallet.txt");
-											FileReader wfr = new FileReader(winefile);
-											BufferedReader wbr = new BufferedReader(fr);
-											String userwallet;
-											while((userwallet = wbr.readLine()) != null) {
-												String[] uw = userwallet.split(":");
-												if(uw[0].equals(user)){
-													//found = true;
-													if(Integer.valueOf(uw[1])>=custo) {
-														System.out.println("Compra pode ser efetuada");
-													} else {
-														System.out.println("Falta de saldo");
-													}
-												}
+											int walletValue = wallet(user,"wallet.txt");
+											if(walletValue >= custo) {
+												System.out.println("Compra pode ser efetuada");
+											} else {
+												System.out.println("Falta de saldo");
 											}
+											
 										}
 									}
 								}
@@ -156,6 +149,28 @@ public class ServerThread extends Thread {
 	
 		
 	}
+	public int wallet(String user,String filepath) {
+		File wallet = new File(filepath);
+		FileReader wfr = null;
+		try {
+			wfr = new FileReader(wallet);
+			BufferedReader wbr = new BufferedReader(wfr);
+			Boolean found = false;
+			String userwallet;
+			while((userwallet = wbr.readLine()) != null) {
+				String[] uw = userwallet.split(":");
+				if(uw[0].equals(user)){
+					return Integer.valueOf(uw[1]);
+				}
+			}
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		return 0;
+		
+	}
 }
+
 
 
