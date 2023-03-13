@@ -77,7 +77,7 @@ public class ServerThread extends Thread {
 						fw.close();
 						bw.close();
 						break;
-					}case BUY:
+					}case BUY:{
 						outStream.writeObject(true);
 						String winename = (String) inStream.readObject();
 						String wineseller = (String) inStream.readObject();
@@ -119,9 +119,19 @@ public class ServerThread extends Thread {
 							}
 						}
 						break;
-					case CLASSIFY:
+					}case CLASSIFY:{
+						outStream.writeObject(true);
+						String winename = (String) inStream.readObject();
+						int stars = (int) inStream.readObject();
+						// Check if exists
+						boolean found = wineExists(winename, "wines.txt");
+						if(!found) {
+							System.out.println("Vinho não existe");
+						} else {
+							// modificar ficheiro
+						}
 						break;
-					case READ:
+					}case READ:
 						break;
 					case SELL:
 						break;
@@ -172,6 +182,27 @@ public class ServerThread extends Thread {
 		}
 		return 0;
 		
+	}
+	public boolean wineExists(String winename,String filepath) {
+		File winefile = new File("wines.txt");
+		try {
+			winefile.createNewFile();
+			FileReader fr = new FileReader(filepath);
+			BufferedReader br = new BufferedReader(fr);
+			FileWriter fw = new FileWriter(winefile, true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			String check;
+			while((check = br.readLine()) != null) {
+				String[] wineInfo = check.split(":");
+				if(wineInfo[0].equals(winename)) {
+					return true;
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 }
 
