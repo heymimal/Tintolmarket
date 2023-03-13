@@ -41,6 +41,38 @@ public class ServerThread extends Thread {
 					System.out.println("yes");
 					System.out.println(user);
 					System.out.println(passwd);
+					FileReader fr = new FileReader(Server.users);
+					BufferedReader br = new BufferedReader(fr);
+					String check;
+					Boolean found = false;
+					while((check = br.readLine()) != null) {
+						System.out.println(check);
+						String[] split = check.split(":");
+						if(split[0].equals(user)) {
+							System.out.println("test");
+							found = true;
+							if(split[1].equals(passwd)) {
+								outStream.writeObject(new Boolean(true));
+							} else {
+								outStream.writeObject(new Boolean(false));
+							}
+						}
+					}
+					if(!found) {
+						FileWriter fw = new FileWriter(Server.users, true);
+						BufferedWriter bw = new BufferedWriter(fw);
+						bw.write(user+":"+passwd);
+						bw.newLine();
+						outStream.writeObject(new Boolean(true));
+						System.out.println("info added");
+						bw.close();
+						fw.close();
+						fw = new FileWriter(Server.wallet,true);
+						bw = new BufferedWriter(fw);
+						bw.write(user+":"+"200");
+						fw.close();
+						bw.close();
+					}
 					//verificação
 					outStream.writeObject(new Boolean(true));
 				}
