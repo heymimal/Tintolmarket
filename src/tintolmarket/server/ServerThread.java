@@ -130,6 +130,8 @@ public class ServerThread extends Thread {
 					case VIEW:
 						break;
 					case WALLET:
+						outStream.writeObject(true);
+						int wallet = wallet(user,"wallet.txt");
 						break;
 					default:
 						break;
