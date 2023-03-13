@@ -45,7 +45,8 @@ public class ServerThread extends Thread {
 				while(true) {
 					this.op = (Operacao)inStream.readObject();
 					switch(this.op) {
-					case ADD:
+					case ADD:{
+						outStream.writeObject(true);
 						System.out.println("Funcao ADD");
 						String winename = (String) inStream.readObject();
 						String wineimage = (String) inStream.readObject();
@@ -70,8 +71,60 @@ public class ServerThread extends Thread {
 							bw.newLine();
 							System.out.println("Vinho adicionado!");
 						}
+						fr.close();
+						br.close();
+						fw.close();
+						bw.close();
 						break;
-					case BUY:
+					}case BUY:
+						outStream.writeObject(true);
+						String winename = (String) inStream.readObject();
+						String wineseller = (String) inStream.readObject();
+						int quantity = (int) inStream.readObject();
+						String check;
+						File winefile = new File("wines.txt");
+						FileReader fr = new FileReader(winefile);
+						BufferedReader br = new BufferedReader(fr);
+						FileWriter fw = new FileWriter(winefile, true);
+						BufferedWriter bw = new BufferedWriter(fw);
+						boolean found = false;
+						//Falta tratar de mudanças de estado
+						while((check = br.readLine()) != null) {
+							String[] wineInfo = check.split(":");
+							if(wineInfo[0].equals(winename)) {
+								found = true;
+								String[] userinfo = wineInfo[2].split(" ");
+								for(String xd:userinfo) {
+									String[] uservalues = xd.split("-");
+									if(uservalues[0].equals(wineseller)) {
+										if(Integer.valueOf(uservalues[1]) < quantity) {
+											System.out.println("Não há unidades suficientes neste comprador");
+										} else {
+											int custo = quantity*Integer.valueOf(uservalues[2]);
+											System.out.println("checking wallet");
+											File wallet = new File("wallet.txt");
+											FileReader wfr = new FileReader(winefile);
+											BufferedReader wbr = new BufferedReader(fr);
+											String userwallet;
+											while((userwallet = wbr.readLine()) != null) {
+												String[] uw = userwallet.split(":");
+												if(uw[0].equals(user)){
+													//found = true;
+													if(Integer.valueOf(uw[1])>=custo) {
+														System.out.println("Compra pode ser efetuada");
+													} else {
+														System.out.println("Falta de saldo");
+													}
+												}
+											}
+										}
+									}
+								}
+								break;
+							} else {
+								System.out.println("Vinho não existe");
+							}
+						}
 						break;
 					case CLASSIFY:
 						break;
