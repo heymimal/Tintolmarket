@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import temporary.Cliente;
+
 
 
 public class Wine implements Serializable {
@@ -43,5 +45,57 @@ public class Wine implements Serializable {
 
 	public int getTotalAmount() {
 		return totalAmount;
+	}
+	public int addClientSeller(String clientName, int quantity, int price) {
+		Cliente c = new Cliente(clientName, quantity, price);
+		int index = this.infoClientes.lastIndexOf(c);
+		if(index != -1) {
+			Cliente n = this.infoClientes.get(index);
+			if(n.getPrice() == price) {
+				System.out.println("Price is equal, adding up the quantity");
+				n.setQuantity(quantity);
+				this.setTotalAmount(this.getTotalAmount() + quantity);
+				this.infoClientes.remove(index);
+				this.infoClientes.add(index, n);
+				return 1;
+				
+			} else {
+				return 0;
+			}
+		}else {
+			this.infoClientes.add(c);
+			System.out.println("Adicionar");
+			//System.out.println(infoClientes.toString());
+			this.setTotalAmount(this.getTotalAmount() + quantity);
+			return 1;
+		}
+	}
+	
+	public int buyWineSeller(String clientName, int quantity, int currentWallet) {
+		Cliente c = new Cliente(clientName);
+		Cliente wtv = this.infoClientes.get(0);
+		//System.out.println(wtv);
+		//System.out.println(c);
+		//System.out.println(Objects.equals(this.infoClientes.get(0), c));
+		int index = this.infoClientes.lastIndexOf(c);
+		if(index == -1) {
+			return -4;
+		} else {
+			Cliente d = this.infoClientes.get(index);
+			if(d.getQuantity() < quantity) {
+				return -3;
+			} else {
+				int totalCost = quantity * d.getPrice();
+				if(currentWallet >= totalCost) {
+					this.totalAmount -=quantity;
+					d.setQuantity(-quantity);
+					this.infoClientes.remove(index);
+					this.infoClientes.add(index, d);
+					return totalCost;
+				} else {
+					return -2;
+				}
+			}
+		}
 	}
 }
