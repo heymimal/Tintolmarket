@@ -1,3 +1,0 @@
-# SC_Tintolmarket
-
-cheguei
