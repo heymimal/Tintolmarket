@@ -113,7 +113,7 @@ public class Wine implements Serializable {
 		return this.getWineName().equals(w.getWineName());
 	}
 	
-	private String getWineName() {
+	public String getWineName() {
 		return this.wineName;
 	}
 	public String toString() {

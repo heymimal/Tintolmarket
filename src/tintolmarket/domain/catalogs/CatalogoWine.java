@@ -39,5 +39,46 @@ public class CatalogoWine {
 		return INSTANCE;
 		
 	}
+	
+	public int sellWine(String winename,String clientName, int quantity, int price) {
+		for (Wine w:this.catWine) {
+			if(w.getWineName().equals(winename)) {
+				return w.addClientSeller(clientName, quantity, price);
+			}
+		}
+		for(Wine w:this.catWine) {
+			System.out.println(w.toString());
+		}
+		return -1;
+	}
+	
+	public boolean rateWine(String winename,int rating) {
+		for (Wine w:this.catWine) {
+			if(w.getWineName().equals(winename)) {
+				return w.rateWine(rating);
+			}
+		}
+		return false;
+	}
+	public int buyWine(String winename,String clientname,int quantity, int wallet) {
+		for (Wine w:this.catWine) {
+			if(w.getWineName().equals(winename)) {
+				return w.buyWineSeller(clientname, quantity, wallet);
+			}
+		}
+		return -1;
+	}
+	
+	public boolean addWine(String winename) {
+		for(Wine w:this.catWine) {
+			if(w.getWineName().equals(winename)) {
+				System.out.println("vinho já existente"); //
+				return false;
+			}
+		}
+		Wine w = new Wine(winename);
+		this.catWine.add(w);
+		return true;
+	}
 
 }
