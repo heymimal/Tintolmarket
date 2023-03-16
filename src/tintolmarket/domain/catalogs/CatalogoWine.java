@@ -80,5 +80,14 @@ public class CatalogoWine {
 		this.catWine.add(w);
 		return true;
 	}
+	
+	public String viewWine(String winename) {
+		for(Wine w:this.catWine) {
+			if(w.equals(winename)) {
+				return w.toString();
+			}
+		}
+		return "";
+	}
 
 }
