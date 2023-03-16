@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import temporary.Cliente;
+import temporary.Wine;
 
 
 
@@ -97,5 +98,31 @@ public class Wine implements Serializable {
 				}
 			}
 		}
+	}
+	public boolean equals(Object o) {
+		if (o == null)
+		    return false;
+		
+		if(o.getClass() == String.class) {
+			return this.getWineName().equals(o);
+		}
+
+		if (this.getClass() != o.getClass())
+		    return false;
+		
+		Wine w = (Wine) o;
+		return this.getWineName().equals(w.getWineName());
+	}
+	
+	private String getWineName() {
+		return this.wineName;
+	}
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (Cliente c:this.infoClientes) {
+			sb.append(c.toString());
+		}
+		return wineName + " " + rating + " " + sb.toString();
+		
 	}
 }
