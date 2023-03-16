@@ -9,10 +9,6 @@ import tintolmarket.domain.Wine;
 public class CatalogoWine {
 	private List<Wine> catWine;
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private CatalogoWine() {
 		this.catWine = new ArrayList<>();
 	 }
