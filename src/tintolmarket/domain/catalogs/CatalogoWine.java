@@ -23,9 +23,9 @@ public class CatalogoWine {
 		
 	}
 	    
-	public static CatalogoWine getInstance(boolean n, Object o) {
+	public static CatalogoWine getInstance(Object o) {
 		if(INSTANCE == null) {
-			if(n) {
+			if(o!=null) {
 				CatalogoWine.INSTANCE = new CatalogoWine((ArrayList<Wine>) o);
 				return INSTANCE;
 			} 
@@ -74,6 +74,7 @@ public class CatalogoWine {
 		}
 		Wine w = new Wine(winename);
 		this.catWine.add(w);
+		
 		return true;
 	}
 	

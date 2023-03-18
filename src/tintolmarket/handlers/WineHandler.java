@@ -11,13 +11,13 @@ public class WineHandler {
 	private CatalogoWallet catwallet;
 	
 	public WineHandler() {
-		this.catwine = CatalogoWine.getInstance(false, null);
-		this.catwallet = CatalogoWallet.getInstance(false, null);
+		this.catwine = CatalogoWine.getInstance(null);
+		this.catwallet = CatalogoWallet.getInstance(null);
 	}
 	
-	public WineHandler(boolean n1, Object o1, boolean n2, Object o2) {
-		this.catwine = CatalogoWine.getInstance(n1, o1);
-		this.catwallet = CatalogoWallet.getInstance(n2, o2);
+	public WineHandler(Object o1,Object o2) {
+		this.catwine = CatalogoWine.getInstance(o1);
+		this.catwallet = CatalogoWallet.getInstance(o2);
 	}
 	
 	public List<Wine> wtv(){

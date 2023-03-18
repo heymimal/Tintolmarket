@@ -20,8 +20,8 @@ public class CatalogoWallet {
 	    
 	private static CatalogoWallet INSTANCE;
 	    
-	public static CatalogoWallet getInstance(boolean n, Object o) {
-		if(n) {
+	public static CatalogoWallet getInstance( Object o) {
+		if(o != null) {
 			CatalogoWallet.INSTANCE = new CatalogoWallet((ArrayList<Wallet>) o);
 			return INSTANCE;
 		} 

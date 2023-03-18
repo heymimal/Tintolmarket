@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
+import tintolmarket.domain.Wine;
 import tintolmarket.domain.catalogs.MessageHandler;
 import tintolmarket.handlers.WineHandler;
 
@@ -38,28 +40,40 @@ public class Server {
 			File messagesFile = new File(messages);
 			File usersFile = new File(users);
 			File walletFile = new File(wallet);
+			Object wineCat = null;
+			Object walletCat = null;
 			if(winesFile.createNewFile()) {
+				System.out.println("winefile created");
 				if(walletFile.createNewFile()) {
+					System.out.println("Walletfile created");
 					wh = new WineHandler();
 				} else {
 					//de-serialize object
 					FileInputStream file = new FileInputStream(walletFile);
-		            ObjectInputStream in = new ObjectInputStream(file);
-					wh = new WineHandler(false,null,true,in.readObject());
+					if(file.available() > 0) {
+						ObjectInputStream in = new ObjectInputStream(file);
+						walletCat = in.readObject();
+					}
+					wh = new WineHandler(wineCat,walletCat);
 				}
 			} else {
+				System.out.println("winefile already exists");
 				FileInputStream file = new FileInputStream(winesFile);
-	            ObjectInputStream in = new ObjectInputStream(file);
-	            Object catWine = in.readObject();
-	            in.close();
+				if(file.available() > 0) {
+					ObjectInputStream in = new ObjectInputStream(file);
+		            wineCat = (ArrayList<Wine>)in.readObject();
+		            in.close();
+				}
 	            file.close();
 	            if(walletFile.createNewFile()) {
-	            	wh = new WineHandler(true,catWine,false,null);
+	            	wh = new WineHandler(wineCat,walletCat);
 	            } else {
 	            	file = new FileInputStream(walletFile);
-	            	in = new ObjectInputStream(file);
-	            	Object catWallet = in.readObject();
-	            	wh = new WineHandler(true,catWine,true,catWallet);
+	            	if(file.available()>0) {
+	            		ObjectInputStream in = new ObjectInputStream(file);
+		            	walletCat = in.readObject();
+	            	}
+	            	wh = new WineHandler(wineCat,walletCat);
 	            }
 			}
 			
@@ -73,7 +87,8 @@ public class Server {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-         
+		wh.addWine("vinho2");
+        System.out.println(wh.wtv().toString());
 		while(true) { // change for multiple clients
 			try {
 				Socket inSoc = sSoc.accept();
