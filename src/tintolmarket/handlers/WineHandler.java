@@ -1,8 +1,13 @@
 package tintolmarket.handlers;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.List;
 
 import tintolmarket.domain.catalogs.*;
+import tintolmarket.server.Server;
 import tintolmarket.domain.Wine;
 import tintolmarket.domain.Wallet;
 
@@ -25,7 +30,12 @@ public class WineHandler {
 	}
 	
 	public boolean addWine(String winename) {
-		return this.catwine.addWine(winename);
+		boolean b = this.catwine.addWine(winename);
+		if(b) {
+			System.out.println("Vinho ainda não existia");
+			this.updateWineFile(Server.wines);
+		}
+		return b;
 	}
 	public boolean addWalletUser(String username) {
 		return this.catwallet.addWallet(username);
@@ -56,6 +66,9 @@ public class WineHandler {
 				walletUser.changeWallet(new_walletUser);
 				this.catwallet.changeWallet(walletUser);
 				this.catwallet.changeWallet(walletSeller);
+				if(this.updateWalletFile(Server.wallet)) {
+					System.out.println("updated");
+				}
 				return 1;
 			}
 			
@@ -75,6 +88,39 @@ public class WineHandler {
 	
 	public boolean classify(String winename,int rating) {
 		return this.catwine.rateWine(winename, rating);
+	}
+	private boolean updateWineFile(String winepath) {
+		FileOutputStream fileOut;
+		try {
+			fileOut = new FileOutputStream(winepath, false);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(this.wtv());
+			out.close();
+			fileOut.close();
+			return true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	private boolean updateWalletFile(String walletpath) {
+		FileOutputStream fileOut;
+		try {
+			fileOut = new FileOutputStream(walletpath, false);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(this.getCatWallet());
+			out.close();
+			fileOut.close();
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return false;
+		
+	}
+	private List<Wallet> getCatWallet(){
+		return this.catwallet.getList();
 	}
 
 }

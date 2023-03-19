@@ -87,7 +87,7 @@ public class Server {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		wh.addWine("vinho2");
+		wh.addWine("vinho6");
         System.out.println(wh.wtv().toString());
 		while(true) { // change for multiple clients
 			try {

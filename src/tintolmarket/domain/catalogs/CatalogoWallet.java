@@ -58,5 +58,9 @@ public class CatalogoWallet {
 		return this.catWallet.add(new Wallet(username));
 	}
 
+	public List<Wallet> getList() {
+		return this.catWallet;
+	}
+
 
 }
