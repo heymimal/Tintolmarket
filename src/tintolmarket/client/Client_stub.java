@@ -41,7 +41,7 @@ public class Client_stub {
 		return null;
 	}
 	
-	public void addwine(String winename, String wineimage) { //throws para ver + void -> String
+	public boolean addwine(String winename, String wineimage) { //throws para ver + void -> String
 		try {
 			
 			this.out.writeObject(Operacao.ADD);
@@ -51,6 +51,9 @@ public class Client_stub {
 				this.out.writeObject(winename);
 				this.out.writeObject(wineimage); // NÃO É ISTO
 				
+				boolean resposta = (boolean) this.in.readObject();
+				return resposta;
+				
 				// devolve erro se já existir
 			} else {
 				System.out.println("erro no servidor");
@@ -58,10 +61,11 @@ public class Client_stub {
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		return false;
 		
 	}
 
-	public void sellwine(String winename, int winevalue, int winequantity) {
+	public int sellwine(String winename, int winevalue, int winequantity) {
 		try {
 			this.out.writeObject(Operacao.SELL);
 			boolean b = (boolean) this.in.readObject();
@@ -70,6 +74,8 @@ public class Client_stub {
 				this.out.writeObject(winename);
 				this.out.writeObject(winevalue); 
 				this.out.writeObject(winequantity);
+				int resposta = (Integer) this.in.readObject();
+				return resposta;
 				// devolve erro se nao existir o vinho
 			} else {
 				System.out.println("erro no servidor");
@@ -78,7 +84,7 @@ public class Client_stub {
 			e.printStackTrace();
 		}
 		
-		
+		return -2;
 	}
 
 	public void read() {
@@ -112,13 +118,24 @@ public class Client_stub {
 		
 	}
 
-	public void wallet() {
+	public int wallet() {
 		// PARA O SERVIDOR - LATER
-		//this.out.writeObject(Operacao.WALLET);
+		try {
+			this.out.writeObject(Operacao.WALLET);
+			boolean b = (boolean) this.in.readObject();
+			if(b) {
+				int i = (Integer)this.in.readObject();
+				return i;
+			}
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return -1;
 		
 	}
 
-	public void buy(String winename, String wineseller, int winequantity) {
+	public int buy(String winename, String wineseller, int winequantity) {
 		try {
 			this.out.writeObject(Operacao.BUY);
 			boolean b = (boolean) this.in.readObject();
@@ -128,6 +145,9 @@ public class Client_stub {
 				this.out.writeObject(wineseller);
 				this.out.writeObject(winequantity);
 				
+				int resposta = (Integer)this.in.readObject();
+				return resposta;
+				
 				// devolve erro se vinho não existir, se wallet atual < valor, quantidade tem de existir
 			} else {
 				System.out.println("erro no servidor");
@@ -135,6 +155,7 @@ public class Client_stub {
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		return -5;
 		
 		
 	}

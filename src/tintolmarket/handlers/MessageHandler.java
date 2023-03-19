@@ -1,4 +1,4 @@
-package tintolmarket.domain.catalogs;
+package tintolmarket.handlers;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

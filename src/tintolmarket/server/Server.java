@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 import tintolmarket.domain.Wine;
-import tintolmarket.domain.catalogs.MessageHandler;
+import tintolmarket.handlers.MessageHandler;
 import tintolmarket.handlers.WineHandler;
 
 
@@ -87,14 +87,13 @@ public class Server {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		wh.addWine("vinho6");
         System.out.println(wh.wtv().toString());
 		while(true) { // change for multiple clients
 			try {
 				Socket inSoc = sSoc.accept();
 				System.out.println("Connection Established");
-				ServerThread newServerThread = new ServerThread(inSoc,wh,mh);
-				newServerThread.start();
+				new ServerThread(inSoc,wh,mh).start();
+				//newServerThread.start();
 		    }
 		    catch (IOException e) {
 		        e.printStackTrace();

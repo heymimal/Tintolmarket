@@ -12,6 +12,7 @@ public class Wine implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String wineName;
 	private double rating;
+	private int counter;
 	private List<Cliente> infoClientes;
 	private int totalAmount;
 	
@@ -19,6 +20,7 @@ public class Wine implements Serializable {
 		this.setWineName(wineName);
 		this.infoClientes = new ArrayList<>();
 		this.rating = -1;
+		this.counter = 0;
 		this.setTotalAmount(0);
 	}
 	private void setTotalAmount(int i) {
@@ -37,7 +39,8 @@ public class Wine implements Serializable {
 
 	private void changeRating(int rating2) {
 		if(this.rating != -1) {
-			this.rating = (this.rating + rating2)/2;
+			this.rating = ((this.rating*counter)+rating2)/counter+1;
+			this.counter++;
 		}
 		else this.rating = rating2;
 		
@@ -73,10 +76,6 @@ public class Wine implements Serializable {
 	
 	public int buyWineSeller(String clientName, int quantity, int currentWallet) {
 		Cliente c = new Cliente(clientName);
-		Cliente wtv = this.infoClientes.get(0);
-		//System.out.println(wtv);
-		//System.out.println(c);
-		//System.out.println(Objects.equals(this.infoClientes.get(0), c));
 		int index = this.infoClientes.lastIndexOf(c);
 		if(index == -1) {
 			return -4;

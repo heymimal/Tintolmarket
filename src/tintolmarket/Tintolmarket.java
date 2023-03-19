@@ -9,8 +9,8 @@ public class Tintolmarket{
 	
 	public static void main(String[] args) {
 		
-	String username = "user";
-	String pass = "pass";
+	String username = "user2";
+	String pass = "pass2";
 	
 	//Se nao recebemos pass, pedir
 	c = new Client_stub(username, pass);
@@ -32,7 +32,11 @@ public class Tintolmarket{
 			String winename = sc.next();
 			String wineimage = sc.next();
 			System.out.println("adding "+ winename + "with the image "+ wineimage);
-			c.addwine(winename,wineimage);
+			if(!c.addwine(winename,wineimage)) {
+				System.out.println("Error");
+			} else {
+				System.out.println("Adicionado corretamente");
+			}
 			break;
 		}
 		case "s":
@@ -43,7 +47,14 @@ public class Tintolmarket{
 			System.out.println("selling wop");
 			System.out.println(winevalue);
 			
-			c.sellwine(winename,winevalue,winequantity);
+			int resposta = c.sellwine(winename,winevalue,winequantity);
+			if(resposta == -1) {
+				System.out.println("Vinho não existe");
+			} else if (resposta == 0){
+				System.out.println("Vinho já tinha sido atribuido com um valor diferente pelo utilizador");
+			} else if(resposta == 1) {
+				System.out.println("Quantidades pretendidas adicionadas");
+			}
 			break;
 		}
 		case "v":
@@ -57,13 +68,24 @@ public class Tintolmarket{
 			String winename = sc.next();
 			String wineseller = sc.next();
 			int winequantity = sc.nextInt();
-			c.buy(winename,wineseller,winequantity);
+			int resposta = c.buy(winename,wineseller,winequantity);
+			if(resposta == -4) {
+				System.out.println("Vendedor não existe");
+			} else if(resposta == -3) {
+				System.out.println("Quantidade não disponivel");
+			} else if(resposta == -2) {
+				System.out.println("Utilizador não possui dinheiro suficiente");
+			} else if(resposta == -1) {
+				System.out.println("Vinho não existe!");
+			} else if(resposta == 1) {
+				System.out.println("Compra efetuada!");
+			}
 			break;
 		}
 		case "w":
 		case "wallet":{
 			System.out.println("Estás pobre");
-			c.wallet();
+			System.out.println(c.wallet()); 
 			break;
 		}
 		case "c":

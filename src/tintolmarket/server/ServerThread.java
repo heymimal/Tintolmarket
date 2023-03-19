@@ -1,7 +1,6 @@
 package tintolmarket.server;
 import tintolmarket.domain.*;
-import tintolmarket.domain.catalogs.MessageHandler;
-import tintolmarket.handlers.WineHandler;
+import tintolmarket.handlers.*;
 
 //import tintolmarket.server.*;
 import java.io.BufferedReader;
@@ -50,7 +49,7 @@ public class ServerThread extends Thread {
 					FileReader fr = new FileReader(Server.users);
 					BufferedReader br = new BufferedReader(fr);
 					String check;
-					Boolean found = false;
+					boolean found = false;
 					while((check = br.readLine()) != null) {
 						System.out.println(check);
 						String[] split = check.split(":");
@@ -69,6 +68,7 @@ public class ServerThread extends Thread {
 						BufferedWriter bw = new BufferedWriter(fw);
 						bw.write(user+":"+passwd);
 						bw.newLine();
+						wh.addWalletUser(user);
 						outStream.writeObject(new Boolean(true));
 						System.out.println("info added");
 						bw.close();
@@ -88,7 +88,8 @@ public class ServerThread extends Thread {
 						System.out.println("Funcao ADD");
 						String winename = (String) inStream.readObject();
 						String wineimage = (String) inStream.readObject(); //not like this
-						wh.addWine(winename);
+						boolean resposta = wh.addWine(winename);
+						outStream.writeObject(resposta);
 						//send to user
 						break;
 					}case BUY:{
