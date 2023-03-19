@@ -4,10 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-
 public class Wine implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String wineName;
@@ -19,7 +15,7 @@ public class Wine implements Serializable {
 	public Wine(String wineName) {
 		this.setWineName(wineName);
 		this.infoClientes = new ArrayList<>();
-		this.rating = -1;
+		this.rating = -1; // 0
 		this.counter = 0;
 		this.setTotalAmount(0);
 	}
@@ -43,6 +39,7 @@ public class Wine implements Serializable {
 			this.counter++;
 		}
 		else this.rating = rating2;
+		this.counter++;
 		
 	}
 

@@ -58,7 +58,7 @@ public class Tintolmarket{
 			break;
 		}
 		case "v":
-		case "view":{
+		case "view":{ //
 			String winename = sc.next();
 			c.view(winename);
 			break;
@@ -93,22 +93,37 @@ public class Tintolmarket{
 			String winename = sc.next();
 			int stars = sc.nextInt();
 			if (stars > 5 || stars < 1) {
-				System.out.println("Estrelas entre 1 e 5");
+				System.out.println("Estrelas têm que estar entre 1 e 5");
 			}
-			c.classify(winename,stars);
+			else {
+				if(c.classify(winename, stars)) {
+					System.out.println("Classificação guardada");
+				} else {
+					System.out.println("vinho não existe");
+				}
+			}
 			break;
 		}
 		case "t":
 		case "talk":{
 			String usersend = sc.next();
 			String message = sc.next();
-			c.talk(usersend,message);
+			if(c.talk(usersend,message)) {
+				System.out.println("Mensagem enviada");
+			} else {
+				System.out.println("Utilizador não existe");
+			}
 			break;
 		}
 		case "r":
 		case "read":{
 			System.out.println("Mensagem ");
-			c.read();
+			String mensagens = c.read();
+			if(mensagens.equals(null)) {
+				System.out.println("Não tens mensagens para ler");
+			} else {
+				System.out.println(mensagens);
+			}
 			break;
 		}
 		case "e":

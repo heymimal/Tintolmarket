@@ -38,7 +38,9 @@ public class WineHandler {
 		return b;
 	}
 	public boolean addWalletUser(String username) {
-		return this.catwallet.addWallet(username);
+		boolean b= this.catwallet.addWallet(username);
+		this.updateWalletFile(Server.wallet);
+		return b;
 	}
 	
 	public int sellWine(String winename,String username,int quantity, int price) {

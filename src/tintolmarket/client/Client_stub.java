@@ -87,18 +87,44 @@ public class Client_stub {
 		return -2;
 	}
 
-	public void read() {
-		// LER MENSAGENS
-		//this.out.writeObject(Operacao.READ);
-	}
+	public String read() {
+		try {
+			this.out.writeObject(Operacao.TALK);
+			boolean b = (boolean) this.in.readObject();
+			if(b) {
+				String s = (String)this.in.readObject();
+				return s;
+			}
+			
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+		
+}
 
-	public void talk(String username2, String message) {
+	public boolean talk(String username2, String message) {
 		// MANDAR MENSAGENS
-		//this.out.writeObject(Operacao.TALK);
+		try {
+			this.out.writeObject(Operacao.TALK);
+			boolean b = (boolean) this.in.readObject();
+			if(b) {
+				this.out.writeObject(username2);
+				this.out.writeObject(message);
+				
+				boolean b2 = (boolean)this.in.readObject();
+				return b2;
+			}
+		} catch (IOException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 		
 	}
 
-	public void classify(String winename, int stars) {
+	public boolean classify(String winename, int stars) {
 		try {
 			this.out.writeObject(Operacao.CLASSIFY);
 			boolean b = (boolean) this.in.readObject();
@@ -106,6 +132,8 @@ public class Client_stub {
 				System.out.println("pedido reconhecido");
 				this.out.writeObject(winename);
 				this.out.writeObject(stars); 
+				boolean resposta = (boolean) this.in.readObject();
+				return resposta;
 				
 				// devolve erro se não existir
 			} else {
@@ -114,12 +142,12 @@ public class Client_stub {
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		return false;
 		
 		
 	}
 
 	public int wallet() {
-		// PARA O SERVIDOR - LATER
 		try {
 			this.out.writeObject(Operacao.WALLET);
 			boolean b = (boolean) this.in.readObject();
@@ -160,7 +188,7 @@ public class Client_stub {
 		
 	}
 
-	public void view(String winename) {
+	public void view(String winename) { // TO CHANGE
 		try {
 			this.out.writeObject(Operacao.VIEW);
 			boolean b = (boolean) this.in.readObject();

@@ -97,19 +97,22 @@ public class ServerThread extends Thread {
 						String winename = (String) inStream.readObject();
 						String wineseller = (String) inStream.readObject();
 						int quantity = (int) inStream.readObject();
-						wh.buyWine(winename, wineseller, user, quantity);
+						int resposta = wh.buyWine(winename, wineseller, user, quantity);
+						outStream.writeObject(resposta);
 						// send to user
 						break;
 					}case CLASSIFY:{
 						outStream.writeObject(true);
 						String winename = (String) inStream.readObject();
 						int stars = (int) inStream.readObject();
-						wh.classify(winename, stars);
+						boolean resposta  = wh.classify(winename, stars);
+						outStream.writeObject(resposta);
 						//send to user
 						break;
 					}case READ:{
 						outStream.writeObject(true);
-						mh.readMessagesbyUser(user);
+						String mensagesLer = mh.readMessagesbyUser(user);
+						outStream.writeObject(mensagesLer);
 						//send to user
 						break;
 					}case SELL:{
@@ -117,14 +120,17 @@ public class ServerThread extends Thread {
 						String winename = (String) inStream.readObject();
 						int value = (Integer) inStream.readObject();
 						int quantity = (Integer) inStream.readObject();
-						wh.sellWine(winename, user, quantity, quantity);
+						int resposta = wh.sellWine(winename, user, quantity, quantity);
+						outStream.writeObject(resposta);
+						
 						//send to user
 						break;
 					}case TALK:
 						outStream.writeObject(true);
 						String to = (String) inStream.readObject();
 						String message = (String) inStream.readObject();
-						mh.addMensagem(user, to, message);
+						boolean resposta = mh.addMensagem(user, to, message);
+						outStream.writeObject(resposta);
 						//send to user
 						break;
 					case VIEW:
