@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 import tintolmarket.domain.Wine;
@@ -96,7 +97,8 @@ public class Server {
 				//newServerThread.start();
 		    }
 		    catch (IOException e) {
-		        e.printStackTrace();
+		        //e.printStackTrace();
+		    	System.out.println("a client disconnected");
 		    }
 		    
 		}

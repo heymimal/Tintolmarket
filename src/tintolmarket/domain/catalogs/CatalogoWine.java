@@ -91,12 +91,14 @@ public class CatalogoWine {
 	}
 	
 	public String viewWine(String winename) {
-		for(Wine w:this.catWine) {
-			if(w.equals(winename)) {
-				return w.toString();
+		synchronized (catWine) {
+			for(Wine w:this.catWine) {
+				if(w.equals(winename)) {
+					return w.toString();
+				}
 			}
+			return "";
 		}
-		return "";
 	}
 
 }

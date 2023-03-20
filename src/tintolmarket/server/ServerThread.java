@@ -31,6 +31,7 @@ public class ServerThread extends Thread {
 
 	@Override
 	public void run(){
+		boolean connected;
 		try {
 			ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 			ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
@@ -81,7 +82,8 @@ public class ServerThread extends Thread {
 					outStream.writeObject(new Boolean(true));
 				}
 				//this.socket.isConnected()
-				while(true) {
+				connected = true;
+				while(connected) {
 					this.op = (Operacao)inStream.readObject();
 					switch(this.op) {
 					case ADD:{
@@ -151,10 +153,19 @@ public class ServerThread extends Thread {
 				}
 				
 			} catch (IOException e1) {
-						e1.printStackTrace();
+						//e1.printStackTrace();
+						connected = false;
 				}
 		}catch (ClassNotFoundException | IOException e1) {
-			e1.printStackTrace();
+			//e1.printStackTrace();
+			connected = false;
+		}
+		System.out.println("Disconnecting...");
+		try {
+			this.socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 	//refazer

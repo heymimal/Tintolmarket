@@ -30,7 +30,10 @@ public class MessageHandler {
 				if(splt[0].equals(to)) {
 					FileWriter fw = new FileWriter(this.messagesPath, true);
 					BufferedWriter bw = new BufferedWriter(fw);
-					mst.addMensagem(from, to, mensagem, bw);
+					synchronized (mst) {
+						mst.addMensagem(from, to, mensagem, bw);
+					}
+					
 					bw.close();
 					fw.close();
 					found = true;
@@ -53,7 +56,10 @@ public class MessageHandler {
 		try {
 			fr = new FileReader(this.messagesPath);
 			BufferedReader br = new BufferedReader(fr);
-			return mst.getMensagensbyUser(user, br, this.messagesPath);
+			synchronized (mst) {
+				return mst.getMensagensbyUser(user, br, this.messagesPath);
+			}
+			
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

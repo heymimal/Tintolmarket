@@ -30,36 +30,50 @@ public class CatalogoWallet {
 	}
 	
 	public Wallet getWalletUser(String username) {
-		for (Wallet w:catWallet) {
+		synchronized (catWallet) {
+			for (Wallet w:catWallet) {
 			if(w.equals(username)) {
 				return w;
 			}
 		}
 		return null;
+		}
+		
 	}
 	public int getWalletValue(String username) {
+		synchronized (catWallet) {
 		for (Wallet w:catWallet) {
 			if(w.equals(username)) {
 				return w.getWallet();
 			}
 		}
-		return -1;
+		return -1;	
+		}
+		
 	}
 	public void changeWallet(Wallet walletUser) {
-		this.catWallet.remove(0);
-		for(int i = 0; i < this.catWallet.size();i++) {
-			if(this.catWallet.get(i).equals(walletUser)) {
-				this.catWallet.remove(i);
-				this.catWallet.add(walletUser);
+		synchronized (catWallet) {
+			for(int i = 0; i < this.catWallet.size();i++) {
+				if(this.catWallet.get(i).equals(walletUser)) {
+					this.catWallet.remove(i);
+					this.catWallet.add(walletUser);
+				}
 			}
 		}
+		
 	}
 	public boolean addWallet(String username) {
-		return this.catWallet.add(new Wallet(username));
+		synchronized (catWallet) {
+			return this.catWallet.add(new Wallet(username));
+		}
+		
 	}
 
 	public List<Wallet> getList() {
-		return this.catWallet;
+		synchronized (catWallet) {
+			return this.catWallet;
+		}
+		
 	}
 
 
