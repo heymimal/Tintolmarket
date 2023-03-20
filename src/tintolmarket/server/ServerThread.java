@@ -80,6 +80,7 @@ public class ServerThread extends Thread {
 					//verificação
 					outStream.writeObject(new Boolean(true));
 				}
+				//this.socket.isConnected()
 				while(true) {
 					this.op = (Operacao)inStream.readObject();
 					switch(this.op) {
