@@ -9,7 +9,7 @@ public class Tintolmarket{
 	
 	public static void main(String[] args) {
 		
-	String username = "user2";
+	String username = "user3";
 	String pass = "pass2";
 	
 	//Se nao recebemos pass, pedir

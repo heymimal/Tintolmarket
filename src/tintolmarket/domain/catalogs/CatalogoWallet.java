@@ -57,6 +57,7 @@ public class CatalogoWallet {
 				if(this.catWallet.get(i).equals(walletUser)) {
 					this.catWallet.remove(i);
 					this.catWallet.add(walletUser);
+					break;
 				}
 			}
 		}

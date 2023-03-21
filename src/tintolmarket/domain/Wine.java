@@ -37,11 +37,14 @@ public class Wine implements Serializable {
 
 	private void changeRating(int rating2) {
 		if(this.rating != -1) {
-			this.rating = ((this.rating*counter)+rating2)/counter+1;
+			this.rating = ((this.rating*counter)+rating2)/(counter+1);
 			this.counter++;
 		}
-		else this.rating = rating2;
-		this.counter++;
+		else {
+			this.rating = rating2;
+			this.counter++;
+		}
+		
 		
 	}
 
@@ -50,15 +53,22 @@ public class Wine implements Serializable {
 	}
 	public int addClientSeller(String clientName, int quantity, int price) {
 		Cliente c = new Cliente(clientName, quantity, price);
+		System.out.println(this.totalAmount);
+		//System.out.println(this.infoClientes.get(0).getPrice());
+		System.out.println(price);
 		int index = this.infoClientes.lastIndexOf(c);
 		if(index != -1) {
+			System.out.println("client found");
 			Cliente n = this.infoClientes.get(index);
+			System.out.println(n.getPrice());
+			System.out.println(price);
 			if(n.getPrice() == price) {
 				System.out.println("Price is equal, adding up the quantity");
 				n.setQuantity(quantity);
 				this.setTotalAmount(this.getTotalAmount() + quantity);
 				this.infoClientes.remove(index);
 				this.infoClientes.add(index, n);
+				System.out.println(this.toString());
 				return 1;
 				
 			} else {
@@ -66,9 +76,11 @@ public class Wine implements Serializable {
 			}
 		}else {
 			this.infoClientes.add(c);
+			System.out.println(this.toString());
 			System.out.println("Adicionar");
 			//System.out.println(infoClientes.toString());
 			this.setTotalAmount(this.getTotalAmount() + quantity);
+			System.out.println(this.totalAmount);
 			return 1;
 		}
 	}

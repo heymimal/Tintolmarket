@@ -46,8 +46,9 @@ public class WineHandler {
 	
 	public int sellWine(String winename,String username,int quantity, int price) {
 		int n = this.catwine.sellWine(winename, username, quantity, price);
+		System.out.println(n);
 		if(n == 1) {
-			this.updateWalletFile(Server.wallet);
+			this.updateWineFile(Server.wines);
 		}
 		return n;
 		
@@ -68,6 +69,7 @@ public class WineHandler {
 			System.out.println(change);
 			Wallet walletSeller = getWalletUser(seller);
 			if(walletSeller.getClass() == Wallet.class) {
+				System.out.println("isWallet");
 				int new_walletUser = wallet - change;
 				int new_walletSeller = walletSeller.getWallet() + change;
 				walletSeller.changeWallet(new_walletSeller);
@@ -95,7 +97,9 @@ public class WineHandler {
 	}
 	
 	public boolean classify(String winename,int rating) {
-		return this.catwine.rateWine(winename, rating);
+		boolean b =  this.catwine.rateWine(winename, rating);
+		this.updateWineFile(Server.wines);
+		return b;
 	}
 	private boolean updateWineFile(String winepath) {
 		FileOutputStream fileOut;

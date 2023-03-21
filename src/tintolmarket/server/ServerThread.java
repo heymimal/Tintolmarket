@@ -73,12 +73,11 @@ public class ServerThread extends Thread {
 						BufferedWriter bw = new BufferedWriter(fw);
 						bw.write(user+":"+passwd);
 						bw.newLine();
-						wh.addWalletUser(user);
+						this.wh.addWalletUser(user);
 						outStream.writeObject(new Boolean(true));
 						System.out.println("info added");
 						bw.close();
 						fw.close();
-						this.wh.addWalletUser(user);
 					}
 					fr.close();
 					br.close();
@@ -149,7 +148,8 @@ public class ServerThread extends Thread {
 						String winename = (String) inStream.readObject();
 						int value = (Integer) inStream.readObject();
 						int quantity = (Integer) inStream.readObject();
-						int resposta = wh.sellWine(winename, user, quantity, quantity);
+						System.out.println(winename +" "+ value + " "+ quantity);
+						int resposta = wh.sellWine(winename, user, quantity, value);
 						outStream.writeObject(resposta);
 						
 						//send to user

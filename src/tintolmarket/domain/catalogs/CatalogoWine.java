@@ -22,6 +22,9 @@ public class CatalogoWine {
 		return this.catWine;
 		
 	}
+	public String toString() {
+		return "teste";
+	}
 	    
 	public static CatalogoWine getInstance(Object o) {
 		if(INSTANCE == null) {
@@ -40,6 +43,7 @@ public class CatalogoWine {
 		synchronized (catWine) {
 			for (Wine w:this.catWine) {
 				if(w.getWineName().equals(winename)) {
+					System.out.println("wine found");
 					return w.addClientSeller(clientName, quantity, price);
 				}
 			}
