@@ -29,8 +29,8 @@ public class WineHandler {
 		return this.catwine.getCatWine();
 	}
 	
-	public boolean addWine(String winename) {
-		boolean b = this.catwine.addWine(winename);
+	public boolean addWine(String winename, String winePath) {
+		boolean b = this.catwine.addWine(winename, winePath);
 		if(b) {
 			System.out.println("Vinho ainda não existia");
 			this.updateWineFile(Server.wines);
@@ -47,7 +47,7 @@ public class WineHandler {
 		return this.catwine.sellWine(winename, username, quantity, price);
 	}
 	
-	public String viewWine(String winename) {
+	public String[] viewWine(String winename) {
 		//TO DO
 		return this.catwine.viewWine(winename);
 	}
