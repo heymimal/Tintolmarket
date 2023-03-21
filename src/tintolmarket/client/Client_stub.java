@@ -1,6 +1,9 @@
 package tintolmarket.client;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
@@ -43,21 +46,36 @@ public class Client_stub {
 	
 	public boolean addwine(String winename, String wineimage) { //throws para ver + void -> String
 		try {
-			
-			this.out.writeObject(Operacao.ADD);
-			boolean b = (boolean) this.in.readObject();
-			if (b) {
-				System.out.println("pedido reconhecido");
-				this.out.writeObject(winename);
-				this.out.writeObject(wineimage); // NÃO É ISTO
-				
-				boolean resposta = (boolean) this.in.readObject();
-				return resposta;
-				
-				// devolve erro se já existir
-			} else {
-				System.out.println("erro no servidor");
+			File file = new File(wineimage);
+			if(file.exists()) {
+				System.out.println("Existe");
+				this.out.writeObject(Operacao.ADD);
+				boolean b = (boolean) this.in.readObject();
+				if (b) {
+					System.out.println("pedido reconhecido");
+					this.out.writeObject(winename);
+					this.out.writeObject(wineimage);
+					boolean resposta = (boolean) this.in.readObject();
+					if(resposta) {
+				        long length = file.length();
+				        byte[] bytes = new byte [1024];
+				        InputStream inF = new FileInputStream(file);
+				        int count;
+				        while ((count = inF.read(bytes)) > 0) {
+				            this.out.write(bytes, 0, count);
+				        }
+				        inF.close();
+				        boolean resposta2 = (boolean) this.in.readObject();
+				        return resposta2;
+					}
+					return resposta;
+					
+					// devolve erro se já existir
+				} else {
+					System.out.println("erro no servidor");
+				}
 			}
+			
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
