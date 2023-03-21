@@ -7,13 +7,15 @@ import java.util.List;
 public class Wine implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String wineName;
+	private String winePath;
 	private double rating;
 	private int counter;
 	private List<Cliente> infoClientes;
 	private int totalAmount;
 	
-	public Wine(String wineName) {
+	public Wine(String wineName, String winePath) {
 		this.setWineName(wineName);
+		this.winePath = winePath;
 		this.infoClientes = new ArrayList<>();
 		this.rating = -1; // 0
 		this.counter = 0;
@@ -119,5 +121,8 @@ public class Wine implements Serializable {
 		}
 		return wineName + " " + rating + " " + sb.toString();
 		
+	}
+	public String getWinePath() {
+		return this.winePath;
 	}
 }
