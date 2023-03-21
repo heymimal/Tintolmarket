@@ -7,11 +7,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
 public class ServerThread extends Thread {
@@ -90,9 +92,21 @@ public class ServerThread extends Thread {
 						outStream.writeObject(true);
 						System.out.println("Funcao ADD");
 						String winename = (String) inStream.readObject();
-						String wineimage = (String) inStream.readObject(); //not like this
-						boolean resposta = wh.addWine(winename);
+						String winepath= "server_ "+(String) inStream.readObject();
+						boolean resposta = wh.addWine(winename,winepath);
 						outStream.writeObject(resposta);
+						if(resposta) {
+							byte[] bytes = new byte[16*1024];
+							File newImage = new File(winepath);
+							newImage.createNewFile();
+							OutputStream outStreamImg = new FileOutputStream(newImage);
+					        int count;
+					        while ((count = inStream.read(bytes)) > 0) {
+					            outStreamImg.write(bytes, 0, count);
+					        }
+					        outStreamImg.close();
+					        outStream.writeObject(true);
+						}
 						//send to user
 						break;
 					}case BUY:{
@@ -139,7 +153,10 @@ public class ServerThread extends Thread {
 					case VIEW:
 						outStream.writeObject(true);
 						String winename = (String) inStream.readObject();
-						wh.viewWine(winename); //needs changes - image related
+						String [] vervinho = wh.viewWine(winename); //needs changes - image related
+						File test = new File(vervinho[1]);
+						System.out.println("Ficheiro existe?" + test.exists());
+						System.out.println(vervinho[0]);
 						//send to user
 						break;
 					case WALLET:
