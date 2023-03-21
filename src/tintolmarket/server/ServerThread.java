@@ -6,11 +6,13 @@ import tintolmarket.handlers.*;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -81,29 +83,39 @@ public class ServerThread extends Thread {
 					fr.close();
 					br.close();
 					//verificação
-					outStream.writeObject(new Boolean(true));
 				}
 				//this.socket.isConnected()
 				connected = true;
 				while(connected) {
+					System.out.println("Waiting for op...");
 					this.op = (Operacao)inStream.readObject();
+					System.out.println(this.op);
 					switch(this.op) {
+					
 					case ADD:{
 						outStream.writeObject(true);
 						System.out.println("Funcao ADD");
 						String winename = (String) inStream.readObject();
-						String winepath= "server_ "+(String) inStream.readObject();
+						String winepath= "server_"+(String) inStream.readObject();
 						boolean resposta = wh.addWine(winename,winepath);
 						outStream.writeObject(resposta);
 						if(resposta) {
-							byte[] bytes = new byte[16*1024];
+							byte[] bytes = new byte[8*1024];
 							File newImage = new File(winepath);
 							newImage.createNewFile();
+							long length = (long) inStream.readObject();
 							OutputStream outStreamImg = new FileOutputStream(newImage);
 					        int count;
-					        while ((count = inStream.read(bytes)) > 0) {
+					        long total = 0;
+					        //(total+1023 < length) &&
+					        while ( (total < length) && (count = inStream.read(bytes)) > 0) {
+					        	System.out.println("total antes: "+total);
 					            outStreamImg.write(bytes, 0, count);
+					            total+=count;
+					            System.out.println("total depois: "+total);
+					            System.out.println("Lenght total "+length );
 					        }
+					        System.out.println("sai");
 					        outStreamImg.close();
 					        outStream.writeObject(true);
 						}
@@ -142,7 +154,7 @@ public class ServerThread extends Thread {
 						
 						//send to user
 						break;
-					}case TALK:
+					}case TALK:{
 						outStream.writeObject(true);
 						String to = (String) inStream.readObject();
 						String message = (String) inStream.readObject();
@@ -150,21 +162,39 @@ public class ServerThread extends Thread {
 						outStream.writeObject(resposta);
 						//send to user
 						break;
-					case VIEW:
-						outStream.writeObject(true);
+					}case VIEW:{
 						String winename = (String) inStream.readObject();
 						String [] vervinho = wh.viewWine(winename); //needs changes - image related
-						File test = new File(vervinho[1]);
-						System.out.println("Ficheiro existe?" + test.exists());
-						System.out.println(vervinho[0]);
-						//send to user
+						if(vervinho!= null) {
+							outStream.writeObject(vervinho[0]);
+							System.out.println(vervinho[0]);
+							System.out.println(vervinho[1]);
+							String[] temp = vervinho[1].split("[.]");
+							outStream.writeObject(temp[1]);
+							File file = new File(vervinho[1]);
+							long length = file.length();
+							outStream.writeObject(length);
+					        byte[] bytes = new byte [1024];
+					        InputStream inF = new FileInputStream(file);
+					        int count;
+					        
+					        while ((count = inF.read(bytes)) > 0) {
+					            outStream.write(bytes, 0, count);
+					            outStream.flush();
+					        }
+					        System.out.println("fora");
+					        inF.close();
+						} else {
+							outStream.writeObject("Erro");
+						}
+						//send to user*/
 						break;
-					case WALLET:
+					}case WALLET:{
 						outStream.writeObject(true);
 						int wallet = wh.getWallerUser(user);
 						outStream.writeObject(wallet);
 						break;
-					default:
+					}default:
 						break;
 					}
 				}

@@ -22,7 +22,7 @@ public class Cliente implements Serializable {
 		this.username = clientName;
 	}
 	public String toString() {
-		return this.username + " " + this.price + " " + this.quantity + "\n";
+		return "Cliente: "+ this.username + " preço: " + this.price + " Unidades: " + this.quantity + "\n";
 	}
 	@Override
 	public boolean equals(Object o) {

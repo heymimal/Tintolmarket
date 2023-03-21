@@ -116,10 +116,18 @@ public class Wine implements Serializable {
 	}
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for (Cliente c:this.infoClientes) {
-			sb.append(c.toString());
+		sb.append("Nome: "+this.wineName);
+		if(this.rating > 0) {
+			sb.append("\n Classificação: "+this.rating);
 		}
-		return wineName + " " + rating + " " + sb.toString();
+		
+		if(this.totalAmount > 0) {
+			sb.append("\n Unidades Disponiveis (Total): "+ this.totalAmount + "\n");
+			for (Cliente c:this.infoClientes) {
+				sb.append(c.toString());
+			}
+		}
+		return sb.toString();
 		
 	}
 	public String getWinePath() {

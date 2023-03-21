@@ -2,10 +2,12 @@ package tintolmarket.client;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import tintolmarket.domain.Operacao;
@@ -58,14 +60,19 @@ public class Client_stub {
 					boolean resposta = (boolean) this.in.readObject();
 					if(resposta) {
 				        long length = file.length();
+				        this.out.writeObject(length);
 				        byte[] bytes = new byte [1024];
 				        InputStream inF = new FileInputStream(file);
 				        int count;
 				        while ((count = inF.read(bytes)) > 0) {
+				        	System.out.println(count);
 				            this.out.write(bytes, 0, count);
+				            this.out.flush();
 				        }
+				        System.out.println("hello");
 				        inF.close();
 				        boolean resposta2 = (boolean) this.in.readObject();
+				        System.out.println("resposta chegou");
 				        return resposta2;
 					}
 					return resposta;
@@ -206,21 +213,68 @@ public class Client_stub {
 		
 	}
 
-	public void view(String winename) { // TO CHANGE
+	public String view(String winename) { // TO CHANGE
 		try {
 			this.out.writeObject(Operacao.VIEW);
-			boolean b = (boolean) this.in.readObject();
+			boolean b = true;
+			System.out.println(b);
 			if (b) {
 				System.out.println("pedido reconhecido");
+				System.out.println(winename);
 				this.out.writeObject(winename);
 				
+				
+				
+					String info = (String) this.in.readObject();
+					System.out.println(info);
+					String extensao = (String) this.in.readObject();
+					System.out.println(extensao);
+					long tamanho = (long) this.in.readObject();
+					System.out.println(tamanho);
+					byte[] bytes = new byte[1024];
+					String newPath = "view_"+winename+"."+extensao;
+					File newImage = new File(newPath);
+					newImage.createNewFile();
+					OutputStream outStreamImg = new FileOutputStream(newImage);
+			        int count;
+			        long total = 0;
+			        while ( (total < tamanho) && (count = this.in.read(bytes)) > 0 ) {
+			        	System.out.println("tamanho antes: "+total);
+			        	total += count;
+			        	//System.out.println(total);
+			        	//System.out.println((float)((total/tamanho)*100) + "%");
+			        	
+			            outStreamImg.write(bytes, 0, count);
+			            System.out.println("tamanho depois: "+total);
+			            System.out.println(tamanho);
+			        }
+			        /*
+			         * byte[] bytes = new byte[16*1024];
+							File newImage = new File(winepath);
+							newImage.createNewFile();
+							OutputStream outStreamImg = new FileOutputStream(newImage);
+					        int count;
+					        while ((count = inStream.read(bytes)) > 0) {
+					            outStreamImg.write(bytes, 0, count);
+					        }
+					        outStreamImg.close();
+					        outStream.writeObject(true);
+			         */
+			        System.out.println("fora cl");
+			        outStreamImg.close();
+			        System.out.println(newImage.getAbsolutePath());
+			        System.out.println(newImage.getPath());
+			        return info + "\n Imagem do vinho encontra-se em: "+ newPath;
+				}
+				
 				// devolve erro se não existir
-			} else {
+			else {
 				System.out.println("erro no servidor");
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		return "Erro";
 		
 		
 	}

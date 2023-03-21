@@ -24,6 +24,7 @@ public class Tintolmarket{
 	System.out.print("insere: ");
 	boolean b = true;
 	while(b) {
+		System.out.print("Insere: ");
 		String command = sc.next();
 		System.out.println(command);
 		switch(command) {
@@ -31,7 +32,7 @@ public class Tintolmarket{
 		case "add":{
 			String winename = sc.next();
 			String wineimage = sc.next();
-			System.out.println("adding "+ winename + "with the image "+ wineimage);
+			System.out.println("adding "+ winename + " with the image "+ wineimage);
 			if(!c.addwine(winename,wineimage)) {
 				System.out.println("Error");
 			} else {
@@ -60,7 +61,7 @@ public class Tintolmarket{
 		case "v":
 		case "view":{ //
 			String winename = sc.next();
-			c.view(winename);
+			System.out.println(c.view(winename));
 			break;
 		}
 		case "b":

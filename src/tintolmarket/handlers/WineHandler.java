@@ -34,6 +34,7 @@ public class WineHandler {
 		if(b) {
 			System.out.println("Vinho ainda não existia");
 			this.updateWineFile(Server.wines);
+			System.out.println("Updated wine file");
 		}
 		return b;
 	}
@@ -44,11 +45,15 @@ public class WineHandler {
 	}
 	
 	public int sellWine(String winename,String username,int quantity, int price) {
-		return this.catwine.sellWine(winename, username, quantity, price);
+		int n = this.catwine.sellWine(winename, username, quantity, price);
+		if(n == 1) {
+			this.updateWalletFile(Server.wallet);
+		}
+		return n;
+		
 	}
 	
 	public String[] viewWine(String winename) {
-		//TO DO
 		return this.catwine.viewWine(winename);
 	}
 	public int buyWine(String winename, String seller, String user, int quantity) {
@@ -59,6 +64,7 @@ public class WineHandler {
 			if(change <= 0) {
 				return change;
 			}
+			this.updateWineFile(Server.wines);
 			System.out.println(change);
 			Wallet walletSeller = getWalletUser(seller);
 			if(walletSeller.getClass() == Wallet.class) {
