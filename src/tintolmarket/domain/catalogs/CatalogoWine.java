@@ -74,7 +74,7 @@ public class CatalogoWine {
 		
 	}
 	
-	public boolean addWine(String winename) {
+	public boolean addWine(String winename, String winePath) {
 		synchronized (catWine) {
 			for(Wine w:this.catWine) {
 			if(w.getWineName().equals(winename)) {
@@ -82,7 +82,7 @@ public class CatalogoWine {
 				return false;
 			}
 		}
-		Wine w = new Wine(winename);
+		Wine w = new Wine(winename,winePath);
 		this.catWine.add(w);
 		
 		return true;
@@ -90,14 +90,17 @@ public class CatalogoWine {
 		
 	}
 	
-	public String viewWine(String winename) {
+	public String[] viewWine(String winename) {
+		String [] con = new String[2];
 		synchronized (catWine) {
 			for(Wine w:this.catWine) {
 				if(w.equals(winename)) {
-					return w.toString();
+					con[0] = w.toString();
+					con[1] = w.getWinePath();
+					return con;
 				}
 			}
-			return "";
+			return null;
 		}
 	}
 
