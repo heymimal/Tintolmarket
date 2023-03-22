@@ -1,4 +1,4 @@
-package tintolmarket.server;
+package tintolmarket.app.server;
 import tintolmarket.domain.*;
 import tintolmarket.handlers.*;
 

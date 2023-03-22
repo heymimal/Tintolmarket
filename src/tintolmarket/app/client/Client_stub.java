@@ -1,4 +1,4 @@
-package tintolmarket.client;
+package tintolmarket.app.client;
 
 import java.io.File;
 import java.io.FileInputStream;

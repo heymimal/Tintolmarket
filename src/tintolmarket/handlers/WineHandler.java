@@ -7,8 +7,8 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 
 import tintolmarket.domain.catalogs.*;
-import tintolmarket.server.Server;
 import tintolmarket.domain.Wine;
+import tintolmarket.app.server.Server;
 import tintolmarket.domain.Wallet;
 
 /**
@@ -112,7 +112,7 @@ public class WineHandler {
 	 * @param user		utilizador que vai comprar o vinho
 	 * @param quantity	quantidade de vinho que vai ser comprada
 	 * @return 0 se o user nao existe, 1 caso a compra seja efetuada, -1 caso o vinho nao exista,
-	 * -4 caso o cliente nao exista, -3 caso a quantidade seja superior à existente, -2 caso nao tenha saldo suficiente
+	 * -4 caso o cliente nao exista, -3 caso a quantidade seja superior ï¿½ existente, -2 caso nao tenha saldo suficiente
 	 */
 	public int buyWine(String winename, String seller, String user, int quantity) {
 		Wallet walletUser = getWalletUser(user);

@@ -1,8 +1,8 @@
-package tintolmarket;
+package tintolmarket.app;
 
 import java.util.Scanner;
 
-import tintolmarket.client.Client_stub;
+import tintolmarket.app.client.Client_stub;
 
 /**
  * Classe Tintolmarket
