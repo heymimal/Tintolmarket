@@ -65,7 +65,7 @@ public class Server {
 				System.out.println("winefile created");
 				if(walletFile.createNewFile()) {
 					System.out.println("Walletfile created");
-					wh = new WineHandler();
+					wh = new WineHandler(Server.wines,Server.wallet, null, null);
 				} else {
 					//de-serialize object
 					FileInputStream file = new FileInputStream(walletFile);
@@ -73,7 +73,7 @@ public class Server {
 						ObjectInputStream in = new ObjectInputStream(file);
 						walletCat = in.readObject();
 					}
-					wh = new WineHandler(wineCat,walletCat);
+					wh = new WineHandler(Server.wines,Server.wallet, wineCat,walletCat);
 				}
 			} else {
 				System.out.println("winefile already exists");
@@ -85,14 +85,14 @@ public class Server {
 				}
 	            file.close();
 	            if(walletFile.createNewFile()) {
-	            	wh = new WineHandler(wineCat,walletCat);
+	            	wh = new WineHandler(Server.wines,Server.wallet, wineCat,walletCat);
 	            } else {
 	            	file = new FileInputStream(walletFile);
 	            	if(file.available()>0) {
 	            		ObjectInputStream in = new ObjectInputStream(file);
 		            	walletCat = in.readObject();
 	            	}
-	            	wh = new WineHandler(wineCat,walletCat);
+	            	wh = new WineHandler(Server.wines,Server.wallet, wineCat,walletCat);
 	            }
 			}
 			
@@ -106,7 +106,6 @@ public class Server {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        System.out.println(wh.wtv().toString());
 		while(true) { // change for multiple clients
 			try {
 				Socket inSoc = sSoc.accept();

@@ -1,6 +1,5 @@
 package tintolmarket.handlers;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -20,6 +19,8 @@ import tintolmarket.domain.Wallet;
 public class WineHandler {
 	private CatalogoWine catwine;
 	private CatalogoWallet catwallet;
+	private String wines;
+	private String wallet;
 	
 	/**
 	 * Construtor do Handler dos Vinhos
@@ -32,8 +33,12 @@ public class WineHandler {
 	/**
 	 * @param o1	object 1
 	 * @param o2	object 2
+	 * @param wines path para ficheiro dos wines
+	 * @param wallet path para ficheiro das wallets
 	 */
-	public WineHandler(Object o1,Object o2) {
+	public WineHandler(String wines,String wallet,Object o1,Object o2) {
+		this.wines = wines;
+		this.wallet = wallet;
 		this.catwine = CatalogoWine.getInstance(o1);
 		this.catwallet = CatalogoWallet.getInstance(o2);
 	}
@@ -41,7 +46,7 @@ public class WineHandler {
 	/**
 	 * @return catalogo de vinhos
 	 */
-	public List<Wine> wtv(){
+	private List<Wine> getCatWine(){
 		return this.catwine.getCatWine();
 	}
 	
@@ -56,8 +61,7 @@ public class WineHandler {
 		boolean b = this.catwine.addWine(winename, winePath);
 		if(b) {
 			System.out.println("Vinho ainda não existia");
-			this.updateWineFile(Server.wines);
-			System.out.println("Updated wine file");
+			this.updateWineFile(this.wines);
 		}
 		return b;
 	}
@@ -70,7 +74,7 @@ public class WineHandler {
 	 */
 	public boolean addWalletUser(String username) {
 		boolean b= this.catwallet.addWallet(username);
-		this.updateWalletFile(Server.wallet);
+		this.updateWalletFile(this.wallet);
 		return b;
 	}
 	
@@ -78,16 +82,15 @@ public class WineHandler {
 	 * Venda de vinho
 	 * 	
 	 * @param winename	nome do vinho a ser vendido
-	 * @param username	nome de quem compra o vinho (?)
+	 * @param username	nome de quem quer vender o vinho
 	 * @param quantity	quantidade a ser vendida
 	 * @param price		preco pelo qual o vinho vai ser vendido
 	 * @return 1 se tudo correr bem, 0 se houver diferencas no preco do vinho, -1 se o vinho nao existe
 	 */
 	public int sellWine(String winename,String username,int quantity, int price) {
 		int n = this.catwine.sellWine(winename, username, quantity, price);
-		System.out.println(n);
 		if(n == 1) {
-			this.updateWineFile(Server.wines);
+			this.updateWineFile(this.wines);
 		}
 		return n;
 		
@@ -97,7 +100,7 @@ public class WineHandler {
 	 * Informacoes sobre o vinho winename
 	 * 	
 	 * @param winename	nome do vinho
-	 * @return array de string com todas as informacoes sobre o vinho, incluindo o seu nome e caminho
+	 * @return array de string com todas as informacoes sobre o vinho e o caminho para a imagem associada
 	 */
 	public String[] viewWine(String winename) {
 		return this.catwine.viewWine(winename);
@@ -105,36 +108,34 @@ public class WineHandler {
 	
 	
 	/**
-	 * Compra de vinho
+	 * Compra de vinho. Se a operacao corre de acordo com o esperado, altera as wallets dos utilizadores envolvidos na transacao
 	 * 
 	 * @param winename	nome do vinho a ser comprado
 	 * @param seller	nome de quem vende o vinho
 	 * @param user		utilizador que vai comprar o vinho
 	 * @param quantity	quantidade de vinho que vai ser comprada
 	 * @return 0 se o user nao existe, 1 caso a compra seja efetuada, -1 caso o vinho nao exista,
-	 * -4 caso o cliente nao exista, -3 caso a quantidade seja superior � existente, -2 caso nao tenha saldo suficiente
+	 * -4 caso o cliente nao exista, -3 caso a quantidade seja superior e existente, -2 caso nao tenha saldo suficiente
 	 */
 	public int buyWine(String winename, String seller, String user, int quantity) {
 		Wallet walletUser = getWalletUser(user);
 		if(walletUser.getClass() == Wallet.class) {
-			int wallet = walletUser.getWallet();
-			int change = this.catwine.buyWine(winename, seller, quantity, wallet);
+			int walletValue = walletUser.getWallet();
+			int change = this.catwine.buyWine(winename, seller, quantity, walletValue);
 			if(change <= 0) {
 				return change;
 			}
-			this.updateWineFile(Server.wines);
-			System.out.println(change);
+			this.updateWineFile(this.wines);
 			Wallet walletSeller = getWalletUser(seller);
 			if(walletSeller.getClass() == Wallet.class) {
-				System.out.println("isWallet");
-				int new_walletUser = wallet - change;
+				int new_walletUser = walletValue - change;
 				int new_walletSeller = walletSeller.getWallet() + change;
 				walletSeller.changeWallet(new_walletSeller);
 				walletUser.changeWallet(new_walletUser);
 				this.catwallet.changeWallet(walletUser);
 				this.catwallet.changeWallet(walletSeller);
-				if(this.updateWalletFile(Server.wallet)) {
-					System.out.println("updated");
+				if(this.updateWalletFile(this.wallet)) {
+					System.out.println("updated wallet file");
 				}
 				return 1;
 			}
@@ -170,7 +171,7 @@ public class WineHandler {
 	 */
 	public boolean classify(String winename,int rating) {
 		boolean b =  this.catwine.rateWine(winename, rating);
-		this.updateWineFile(Server.wines);
+		this.updateWineFile(this.wines);
 		return b;
 	}
 	
@@ -178,7 +179,7 @@ public class WineHandler {
 	/**
 	 * Update ao ficheiro com os vinhos
 	 * 
-	 * @param winepath	path do vinho
+	 * @param winepath	path do ficheiro dos wines
 	 * @return true caso a atualizacao tenha sido bem sucedida, false caso contrario
 	 */
 	private boolean updateWineFile(String winepath) {
@@ -186,7 +187,7 @@ public class WineHandler {
 		try {
 			fileOut = new FileOutputStream(winepath, false);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
-			out.writeObject(this.wtv());
+			out.writeObject(this.getCatWine());
 			out.close();
 			fileOut.close();
 			return true;
@@ -201,7 +202,7 @@ public class WineHandler {
 	/**
 	 * Update as wallets
 	 * 
-	 * @param walletpath	path da wallet
+	 * @param walletpath	path do ficheiro wallet
 	 * @return true caso a atualizacao tenha sido bem sucedida, false caso contrario
 	 */
 	private boolean updateWalletFile(String walletpath) {
