@@ -60,9 +60,6 @@ public class ServerThread extends Thread {
 				
 				System.out.println("thread: depois de receber a password e o user");
 				if (user.length() != 0){
-					System.out.println("yes");
-					System.out.println(user);
-					System.out.println(passwd);
 					FileReader fr = new FileReader(Server.users);
 					BufferedReader br = new BufferedReader(fr);
 					String check;
@@ -71,11 +68,12 @@ public class ServerThread extends Thread {
 						System.out.println(check);
 						String[] split = check.split(":");
 						if(split[0].equals(user)) {
-							System.out.println("test");
 							found = true;
 							if(split[1].equals(passwd)) {
+								System.out.println("password matches. User "+ user + " has logged in.");
 								outStream.writeObject(new Boolean(true));
 							} else {
+								System.out.println("Password doens't match.");
 								outStream.writeObject(new Boolean(false));
 							}
 						}
@@ -87,7 +85,6 @@ public class ServerThread extends Thread {
 						bw.newLine();
 						this.wh.addWalletUser(user);
 						outStream.writeObject(new Boolean(true));
-						System.out.println("info added");
 						bw.close();
 						fw.close();
 					}
@@ -95,17 +92,15 @@ public class ServerThread extends Thread {
 					br.close();
 					//verificação
 				}
-				//this.socket.isConnected()
 				connected = true;
 				while(connected) {
 					System.out.println("Waiting for op...");
 					this.op = (Operacao)inStream.readObject();
-					System.out.println(this.op);
+					System.out.println("Operarion: "+ this.op);
 					switch(this.op) {
 					
 					case ADD:{
 						outStream.writeObject(true);
-						System.out.println("Funcao ADD");
 						String winename = (String) inStream.readObject();
 						String winepath= "server_"+(String) inStream.readObject();
 						boolean resposta = wh.addWine(winename,winepath);
@@ -118,15 +113,10 @@ public class ServerThread extends Thread {
 							OutputStream outStreamImg = new FileOutputStream(newImage);
 					        int count;
 					        long total = 0;
-					        //(total+1023 < length) &&
 					        while ( (total < length) && (count = inStream.read(bytes)) > 0) {
-					        	System.out.println("total antes: "+total);
 					            outStreamImg.write(bytes, 0, count);
 					            total+=count;
-					            System.out.println("total depois: "+total);
-					            System.out.println("Lenght total "+length );
 					        }
-					        System.out.println("sai");
 					        outStreamImg.close();
 					        outStream.writeObject(true);
 						}
@@ -139,7 +129,6 @@ public class ServerThread extends Thread {
 						int quantity = (int) inStream.readObject();
 						int resposta = wh.buyWine(winename, wineseller, user, quantity);
 						outStream.writeObject(resposta);
-						// send to user
 						break;
 					}case CLASSIFY:{
 						outStream.writeObject(true);
@@ -160,7 +149,6 @@ public class ServerThread extends Thread {
 						String winename = (String) inStream.readObject();
 						int value = (Integer) inStream.readObject();
 						int quantity = (Integer) inStream.readObject();
-						System.out.println(winename +" "+ value + " "+ quantity);
 						int resposta = wh.sellWine(winename, user, quantity, value);
 						outStream.writeObject(resposta);
 						
@@ -179,8 +167,6 @@ public class ServerThread extends Thread {
 						String [] vervinho = wh.viewWine(winename); //needs changes - image related
 						if(vervinho!= null) {
 							outStream.writeObject(vervinho[0]);
-							System.out.println(vervinho[0]);
-							System.out.println(vervinho[1]);
 							String[] temp = vervinho[1].split("[.]");
 							outStream.writeObject(temp[1]);
 							File file = new File(vervinho[1]);
@@ -189,12 +175,10 @@ public class ServerThread extends Thread {
 					        byte[] bytes = new byte [1024];
 					        InputStream inF = new FileInputStream(file);
 					        int count;
-					        
 					        while ((count = inF.read(bytes)) > 0) {
 					            outStream.write(bytes, 0, count);
 					            outStream.flush();
 					        }
-					        System.out.println("fora");
 					        inF.close();
 						} else {
 							outStream.writeObject("Erro");
@@ -212,7 +196,6 @@ public class ServerThread extends Thread {
 				}
 				
 			} catch (IOException e1) {
-						//e1.printStackTrace();
 						connected = false;
 				}
 		}catch (ClassNotFoundException | IOException e1) {

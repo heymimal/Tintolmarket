@@ -39,7 +39,7 @@ public class Server {
 				server.startServer(PORT_DEFAULT);
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			System.exit(0);
 		}
 	}
 
@@ -54,7 +54,6 @@ public class Server {
         
 		try {
 			sSoc = new ServerSocket(PORT);
-			// file creation 
 			File winesFile = new File(wines);
 			File messagesFile = new File(messages);
 			File usersFile = new File(users);
@@ -64,7 +63,7 @@ public class Server {
 			if(winesFile.createNewFile()) {
 				System.out.println("winefile created");
 				if(walletFile.createNewFile()) {
-					System.out.println("Walletfile created");
+					System.out.println("walletfile created");
 					wh = new WineHandler(Server.wines,Server.wallet, null, null);
 				} else {
 					//de-serialize object
@@ -72,6 +71,7 @@ public class Server {
 					if(file.available() > 0) {
 						ObjectInputStream in = new ObjectInputStream(file);
 						walletCat = in.readObject();
+						in.close();
 					}
 					wh = new WineHandler(Server.wines,Server.wallet, wineCat,walletCat);
 				}
@@ -91,6 +91,7 @@ public class Server {
 	            	if(file.available()>0) {
 	            		ObjectInputStream in = new ObjectInputStream(file);
 		            	walletCat = in.readObject();
+		            	in.close();
 	            	}
 	            	wh = new WineHandler(Server.wines,Server.wallet, wineCat,walletCat);
 	            }
