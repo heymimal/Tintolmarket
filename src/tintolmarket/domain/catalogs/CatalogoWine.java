@@ -33,15 +33,8 @@ public class CatalogoWine {
 		return this.catWine;
 		
 	}
-	
-	public String toString() {
-		return "teste";
-	}
-	    
-	/**
-	 * @param o ???
-	 * @return
-	 */
+	 
+	//SINGLETON
 	public static CatalogoWine getInstance(Object o) {
 		if(INSTANCE == null) {
 			if(o!=null) {
@@ -59,21 +52,17 @@ public class CatalogoWine {
 	 * Vender vinho
 	 * 
 	 * @param winename	vinho a vender
-	 * @param clientName	nome do vendedor (?)
+	 * @param seller	nome do vendedor 
 	 * @param quantity		quantidade de vinho a vender
-	 * @param price		preço do vinho a vender
+	 * @param price		preï¿½o do vinho a vender
 	 * @return	-1 se vinho nao existe, 0 caso precos sejam diferentes e 1 se a venda for efetuada
 	 */
-	public int sellWine(String winename,String clientName, int quantity, int price) {
+	public int sellWine(String winename,String seller, int quantity, int price) {
 		synchronized (catWine) {
 			for (Wine w:this.catWine) {
 				if(w.getWineName().equals(winename)) {
-					System.out.println("wine found");
-					return w.addClientSeller(clientName, quantity, price);
+					return w.addClientSeller(seller, quantity, price);
 				}
-			}
-			for(Wine w:this.catWine) {
-				System.out.println(w.toString());
 			}
 			return -1;
 		}
@@ -102,17 +91,17 @@ public class CatalogoWine {
 	 * Compra de vinho
 	 * 
 	 * @param winename	nome do vinho a ser comprado
-	 * @param clientname	nome do cliente que compra o vinho (?)
+	 * @param seller	nome do vendedor
 	 * @param quantity		quantidade de vinho a ser comprada
 	 * @param wallet		wallet do cliente
 	 * @return -1 caso o vinho nao exista, -4 caso o cliente nao exista, -3 caso a quantidade desejada seja
 	 * maior que a disponivel, -2 caso nao tenha dinheiro suficiente, caso contrario o custo total da compra
 	 */
-	public int buyWine(String winename,String clientname,int quantity, int wallet) {
+	public int buyWine(String winename,String seller,int quantity, int wallet) {
 		synchronized (catWine) {
 			for (Wine w:this.catWine) {
 				if(w.getWineName().equals(winename)) {
-					return w.buyWineSeller(clientname, quantity, wallet);
+					return w.buyWineSeller(seller, quantity, wallet);
 				}
 			}
 			return -1;
@@ -124,16 +113,15 @@ public class CatalogoWine {
 	 * Adicao de vinho para venda
 	 * 
 	 * @param winename	nome do vinho
-	 * @param winePath	path do vinho (sua imagem)
+	 * @param winePath	path para a imagem associada
 	 * @return false se o vinho ja existe, true caso contrario
 	 */
 	public boolean addWine(String winename, String winePath) {
 		synchronized (catWine) {
 			for(Wine w:this.catWine) {
-			if(w.getWineName().equals(winename)) {
-				System.out.println("vinho jÃ¡ existente"); //
-				return false;
-			}
+				if(w.getWineName().equals(winename)) {
+					return false;
+				}
 		}
 		Wine w = new Wine(winename,winePath);
 		this.catWine.add(w);
@@ -144,7 +132,7 @@ public class CatalogoWine {
 	}
 	
 	/**
-	 * Vista de informacoes sobre o vinho
+	 * informacoes sobre o vinho winename
 	 * 
 	 * @param winename	nome do vinho
 	 * @return de informacoes sobre o vinho, null caso nao exista
