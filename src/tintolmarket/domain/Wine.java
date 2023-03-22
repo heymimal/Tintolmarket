@@ -24,13 +24,13 @@ public class Wine implements Serializable {
 	 * Construtor do vinho
 	 * 
 	 * @param wineName	nome do vinho
-	 * @param winePath	caminho do vinho (sua imagem)
+	 * @param winePath	caminho da imagem do vinho
 	 */
 	public Wine(String wineName, String winePath) {
 		this.setWineName(wineName);
 		this.winePath = winePath;
 		this.infoClientes = new ArrayList<>();
-		this.rating = -1; // 0
+		this.rating = 0; // 0
 		this.counter = 0;
 		this.setTotalAmount(0);
 	}
@@ -53,7 +53,7 @@ public class Wine implements Serializable {
 	
 	
 	/**
-	 * Verificar atribuicao de rating ao vinho
+	 * Atualiza a classificacao do vinho
 	 * 
 	 * @param rating	classificacao que vai ser atribuida
 	 * @return true apos se fazer o rating ao vinho
@@ -66,17 +66,17 @@ public class Wine implements Serializable {
 	
 
 	/**
-	 * Mudanca de rating ao vinho
+	 * Altera a classificacao do vinho, incrementa o counter;
 	 * 
-	 * @param rating2	rating atribuido ao vinho
+	 * @param newRating	rating a adicionar ao vinho
 	 */
-	private void changeRating(int rating2) {
-		if(this.rating != -1) {
-			this.rating = ((this.rating*counter)+rating2)/(counter+1);
+	private void changeRating(int newRating) {
+		if(this.rating != 0) {
+			this.rating = ((this.rating*counter)+newRating)/(counter+1);
 			this.counter++;
 		}
 		else {
-			this.rating = rating2;
+			this.rating = newRating;
 			this.counter++;
 		}
 		
@@ -92,31 +92,24 @@ public class Wine implements Serializable {
 	
 	
 	/**
-	 * Adicionar Cliente Vendedor (duvidas!!)
+	 * Adiciona informaçao sobre um cliente vendedor de this.winename a this.infoClientes.
 	 * 
-	 * @param clientName	nome do vendedor
+	 * @param seller	nome do vendedor
 	 * @param quantity		quantidade de vinho que esta a vender
 	 * @param price			preco do vinho
-	 * @return 1 se o cliente ja existe e o price � igual ao anterior ou se nao existe e vai ser adicionado, 0 se existir mas o price mudar.
+	 * @return 1 se o cliente ja existe e o price eh igual ao anterior ou se nao existe e vai ser adicionado, 0 se existir 
+	 * mas o price ja estabelecido for diferente do novo (nao e adicionado).
 	 */
-	public int addClientSeller(String clientName, int quantity, int price) {
-		Cliente c = new Cliente(clientName, quantity, price);
-		System.out.println(this.totalAmount);
-		//System.out.println(this.infoClientes.get(0).getPrice());
-		System.out.println(price);
+	public int addClientSeller(String seller, int quantity, int price) {
+		Cliente c = new Cliente(seller, quantity, price);
 		int index = this.infoClientes.lastIndexOf(c);
 		if(index != -1) {
-			System.out.println("client found");
 			Cliente n = this.infoClientes.get(index);
-			System.out.println(n.getPrice());
-			System.out.println(price);
 			if(n.getPrice() == price) {
-				System.out.println("Price is equal, adding up the quantity");
 				n.setQuantity(quantity);
 				this.setTotalAmount(this.getTotalAmount() + quantity);
 				this.infoClientes.remove(index);
 				this.infoClientes.add(index, n);
-				System.out.println(this.toString());
 				return 1;
 				
 			} else {
@@ -124,19 +117,15 @@ public class Wine implements Serializable {
 			}
 		}else {
 			this.infoClientes.add(c);
-			System.out.println(this.toString());
-			System.out.println("Adicionar");
-			//System.out.println(infoClientes.toString());
 			this.setTotalAmount(this.getTotalAmount() + quantity);
-			System.out.println(this.totalAmount);
 			return 1;
 		}
 	}
 	
 	/**
-	 * Compra do vinho (confirmar!!)
+	 * Compra quantity unidades do vinho ao user clientName.
 	 * 
-	 * @param clientName	nome do cliente (que quer comprar)
+	 * @param clientName	nome do cliente (que esta a vender)
 	 * @param quantity		quantidade que se pretende comprar
 	 * @param currentWallet		wallet do clientName
 	 * 
@@ -191,17 +180,18 @@ public class Wine implements Serializable {
 	}
 	
 	/**
-	 * @return string com informacoes acerca do vinho, como o seu nome, classificao e unidades disponiveis, bem como do cliente
+	 * @return string com informacoes acerca do vinho, como o seu nome, classificao e unidades disponiveis, bem como dos clientes que
+	 * pretendem vender esse vinho
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Nome: "+this.wineName);
 		if(this.rating > 0) {
-			sb.append("\n Classificação: "+this.rating);
+			sb.append("\nClassificação: "+this.rating);
 		}
 		
 		if(this.totalAmount > 0) {
-			sb.append("\n Unidades Disponiveis (Total): "+ this.totalAmount + "\n");
+			sb.append("\nUnidades Disponiveis (Total): "+ this.totalAmount + "\n");
 			for (Cliente c:this.infoClientes) {
 				sb.append(c.toString());
 			}
@@ -211,7 +201,7 @@ public class Wine implements Serializable {
 	}
 	
 	/**
-	 * @return caminho do vinho (da sua imagem)
+	 * @return caminho da imagem do vinho
 	 */
 	public String getWinePath() {
 		return this.winePath;

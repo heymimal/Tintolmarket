@@ -23,6 +23,7 @@ import tintolmarket.handlers.WineHandler;
  */
 public class Server {
 	
+	private static final int PORT_DEFAULT = 12345;
 	public static final String users = "users.txt";
 	public static final String wines = "wines.txt";
 	public static final String wallet = "wallet.txt";
@@ -31,19 +32,28 @@ public class Server {
 	public static void main(String[] args) {
 		System.out.println("servidor: main tintol");
 		Server server = new Server();
-		server.startServer();
+		try {
+			if(args.length != 0) {
+				server.startServer(Integer.parseInt(args[0]));
+			} else {
+				server.startServer(PORT_DEFAULT);
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
 	}
 
 	/**
 	 * Start the server
 	 */
-	public void startServer (){ //will receive values
+	public void startServer (int PORT){ //will receive values
 		ServerSocket sSoc = null;
 		WineHandler wh = null;
 		MessageHandler mh = new MessageHandler(users,messages);
+		System.out.println(PORT);
         
 		try {
-			sSoc = new ServerSocket(12345);
+			sSoc = new ServerSocket(PORT);
 			// file creation 
 			File winesFile = new File(wines);
 			File messagesFile = new File(messages);

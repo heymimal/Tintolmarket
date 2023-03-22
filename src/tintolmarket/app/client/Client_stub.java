@@ -11,15 +11,16 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import tintolmarket.domain.Operacao;
-
 /**
  * Classe do Client_stub
  * 
  * @author fc54446, fc54409, fc54933
  */
 public class Client_stub {
+	private final String PORT_DEFAULT = "12345";
 	private String username;
 	private String pass;
+	private String[] address;
 	private Socket clientSocket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
@@ -29,23 +30,44 @@ public class Client_stub {
 	 * 
 	 * @param username
 	 * @param pass
+	 * @param password 
 	 */
-	public Client_stub(String username, String pass) {
+	public Client_stub(String address, String username, String password) {
 		//criar estruturas para conexão com servidor
 		//enviar username e pass para servidor
+		this.address = setAddress(address);
 		setUsername(username);
-		setPass(pass);
+		setPass(password);
 		clientSocket = null;
 		
 	}
 	
+	private String[] setAddress(String address) {
+		// TODO Auto-generated method stub
+		String[] returnv = new String [2];
+		if(address.contains(":")) {
+			
+			String [] addSplit = address.split(":");
+			returnv[0] = addSplit[0];
+			if(addSplit.length == 2) {
+				if(addSplit[1].length() == 5) {
+					returnv[1] = addSplit[1];
+;				}
+			} else {
+				returnv[1] = this.PORT_DEFAULT;
+			}
+		}
+		return returnv;
+	}
+
 	/**
 	 * Conexao do Cliente
 	 * @return true se conectar, false se nao conectar, null se houver algum erro/excecao
 	 */
 	public Boolean connect() {//will receive values
 		try {
-			this.clientSocket = new Socket(InetAddress.getLocalHost(),12345);
+			
+			this.clientSocket = new Socket(this.address[0],Integer.parseInt(this.address[1]));
 			this.out = new ObjectOutputStream(clientSocket.getOutputStream());
 			this.in = new ObjectInputStream(clientSocket.getInputStream());
 			
@@ -152,7 +174,7 @@ public class Client_stub {
 	 */
 	public String read() {
 		try {
-			this.out.writeObject(Operacao.TALK);
+			this.out.writeObject(Operacao.READ);
 			boolean b = (boolean) this.in.readObject();
 			if(b) {
 				String s = (String)this.in.readObject();

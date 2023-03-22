@@ -13,18 +13,32 @@ public class Tintolmarket{
 	public static Client_stub c; //Conechao
 	
 	public static void main(String[] args) {
+	
+		String address;
+		String username;
+		String password;
+		Scanner sc = new Scanner(System.in);
 		
-	String username = "user3";
-	String pass = "pass2";
+	if(args.length == 2) {
+		address = args[0];
+		username = args[1];
+		System.out.print("Por favor insira a sua password:");
+		password = sc.next();
+		c = new Client_stub(address,username, password);
+		
+	} else if(args.length == 3) {
+		address = args[0];
+		username = args[1];
+		password = args[2];
+		c = new Client_stub(address,username, password);
+	}
 	
 	//Se nao recebemos pass, pedir
-	c = new Client_stub(username, pass);
+	
 	if(!c.connect()) {
 		System.out.println("erro");
 	} else {
 	System.out.println("passou sem errar");
-	// depois de fazer conect, dar display das operacoes possiveis e comecar a fazer
-	Scanner sc = new Scanner(System.in);
 	System.out.println("Hello!");
 	System.out.print("insere: ");
 	boolean b = true;
@@ -73,6 +87,7 @@ public class Tintolmarket{
 		case "buy":{
 			String winename = sc.next();
 			String wineseller = sc.next();
+			//check if wineseller == username
 			int winequantity = sc.nextInt();
 			int resposta = c.buy(winename,wineseller,winequantity);
 			if(resposta == -4) {
@@ -113,7 +128,8 @@ public class Tintolmarket{
 		case "t":
 		case "talk":{
 			String usersend = sc.next();
-			String message = sc.next();
+			String message = sc.nextLine();
+			System.out.println(message);
 			if(c.talk(usersend,message)) {
 				System.out.println("Mensagem enviada");
 			} else {

@@ -16,7 +16,7 @@ public class MessageSaver {
 private static final String SEPARAR = "/*-*/";
 	
 	/**
-	 * Escrever a mensagem
+	 * Escreve a mensagem para o ficheiro das mensagens
 	 * 
 	 * @param from	quem envia a mensagem
 	 * @param to	recetor da mensagem
@@ -28,18 +28,17 @@ private static final String SEPARAR = "/*-*/";
 			bw.write(to + SEPARAR + from + SEPARAR + mensagem);
 			bw.newLine();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
 	/**
-	 * Receber as mensagens do utilizador user
+	 * Recebe as mensagens encaminhadas para o utilizador user do ficheiro das mensagens. Apaga as mensagens recebidas do ficheiro.
 	 * 
 	 * @param user	o utilizador
 	 * @param br	bufferedReader
-	 * @param messagePath	caminho da mensagem
-	 * @return	a mensagem do user, null caso ocorra algum erro (duvidas!!!!!!!!!)
+	 * @param messagePath	caminho do ficheiro das mensages
+	 * @return	mensagens encaminhadas ao utilizador
 	 */
 	public String getMensagensbyUser(String user, BufferedReader br, String messagePath) {
 		StringBuilder sb = new StringBuilder();
@@ -47,15 +46,8 @@ private static final String SEPARAR = "/*-*/";
 		String check;
 		try {
 			while((check = br.readLine()) != null) {
-				System.out.println("Reading this line: ");
-				System.out.println(check);
 				String[] temp = check.split(SEPARAR);
-				for(String t:temp) {
-					System.out.println(t);
-				}
 				if(temp[0].equals(user)) {
-					System.out.println("USER FOUND");
-					System.out.println(temp[1]+ ":" + temp[2]);
 					sb.append(temp[2]+":"+temp[4]+ "\n");
 				} else {
 					sbtemp.append(check + "\n");
@@ -64,7 +56,6 @@ private static final String SEPARAR = "/*-*/";
 			}
 			FileWriter fw = new FileWriter(messagePath, false);
 			BufferedWriter bw = new BufferedWriter(fw);
-			System.out.println("ola \n" + sb.toString());
 			bw.write(sbtemp.toString());
 			bw.close();
 			fw.close();

@@ -9,13 +9,15 @@ import java.io.Serializable;
  *
  */
 public class Wallet implements Serializable {
+	private static final long serialVersionUID = 1L;
 	private static final int DEFAULT_VALUE = 200;
 	private String username;
 	private int walletValue;
 	
 	/**
-	 * Construtor da wallet
-	 * @param username	user da wallet
+	 * Construtor da wallet, define o valor inicial como DEFAULT_VALUE
+	 * @param username	username associado
+	 * 
 	 */
 	public Wallet(String username) {
 		this.setUsername(username);
@@ -51,6 +53,7 @@ public class Wallet implements Serializable {
 	}
 	
 	/**
+	 * Altera o valor da wallet to user
 	 * @param value		novo valor da wallet
 	 */
 	public void changeWallet(int value) {
