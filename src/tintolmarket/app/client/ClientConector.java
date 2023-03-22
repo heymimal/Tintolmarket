@@ -323,7 +323,7 @@ public class ClientConector {
 	        outStreamImg.close();
 	        System.out.println("Abs:" + newImage.getAbsolutePath());
 	        System.out.println("normal "+newImage.getPath());
-	        return info + "Imagem do vinho encontra-se em: "+ newPath + "\n";
+	        return info + "\nImagem do vinho encontra-se em: "+ newPath + "\n";
 		
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
