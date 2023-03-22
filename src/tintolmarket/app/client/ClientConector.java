@@ -16,7 +16,7 @@ import tintolmarket.domain.Operacao;
  * 
  * @author fc54446, fc54409, fc54933
  */
-public class Client_stub {
+public class ClientConector {
 	private final String PORT_DEFAULT = "12345";
 	private String username;
 	private String pass;
@@ -32,7 +32,7 @@ public class Client_stub {
 	 * @param pass
 	 * @param password 
 	 */
-	public Client_stub(String address, String username, String password) {
+	public ClientConector(String address, String username, String password) {
 		//criar estruturas para conexão com servidor
 		//enviar username e pass para servidor
 		this.address = setAddress(address);
@@ -108,7 +108,6 @@ public class Client_stub {
 				        InputStream inF = new FileInputStream(file);
 				        int count;
 				        while ((count = inF.read(bytes)) > 0) {
-				        	System.out.println(count);
 				            this.out.write(bytes, 0, count);
 				            this.out.flush();
 				        }
@@ -120,7 +119,7 @@ public class Client_stub {
 					
 					// devolve erro se já existir
 				} else {
-					System.out.println("erro no servidor");
+					System.out.println("Erro no servidor.");
 				}
 			}
 			System.out.println("Ficheiro nao existe.");
@@ -147,7 +146,6 @@ public class Client_stub {
 			this.out.writeObject(Operacao.SELL);
 			boolean b = (boolean) this.in.readObject();
 			if (b) {
-				System.out.println("pedido reconhecido");
 				this.out.writeObject(winename);
 				this.out.writeObject(winevalue); 
 				this.out.writeObject(winequantity);
@@ -155,7 +153,7 @@ public class Client_stub {
 				return resposta;
 				// devolve erro se nao existir o vinho
 			} else {
-				System.out.println("erro no servidor");
+				System.out.println("Erro no servidor.");
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
@@ -226,7 +224,6 @@ public class Client_stub {
 			this.out.writeObject(Operacao.CLASSIFY);
 			boolean b = (boolean) this.in.readObject();
 			if (b) {
-				System.out.println("pedido reconhecido");
 				this.out.writeObject(winename);
 				this.out.writeObject(stars); 
 				boolean resposta = (boolean) this.in.readObject();
@@ -234,7 +231,7 @@ public class Client_stub {
 				
 				// devolve erro se não existir
 			} else {
-				System.out.println("erro no servidor");
+				System.out.println("Erro no servidor.");
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
@@ -279,7 +276,6 @@ public class Client_stub {
 			this.out.writeObject(Operacao.BUY);
 			boolean b = (boolean) this.in.readObject();
 			if (b) {
-				System.out.println("pedido reconhecido");
 				this.out.writeObject(winename);
 				this.out.writeObject(wineseller);
 				this.out.writeObject(winequantity);
@@ -289,7 +285,7 @@ public class Client_stub {
 				
 				// devolve erro se vinho não existir, se wallet atual < valor, quantidade tem de existir
 			} else {
-				System.out.println("erro no servidor");
+				System.out.println("Erro no servidor.");
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
@@ -309,61 +305,26 @@ public class Client_stub {
 	public String view(String winename) { // TO CHANGE
 		try {
 			this.out.writeObject(Operacao.VIEW);
-			boolean b = true;
-			System.out.println(b);
-			if (b) {
-				System.out.println("pedido reconhecido");
-				System.out.println(winename);
-				this.out.writeObject(winename);
-				
-				
-				
-					String info = (String) this.in.readObject();
-					System.out.println(info);
-					String extensao = (String) this.in.readObject();
-					System.out.println(extensao);
-					long tamanho = (long) this.in.readObject();
-					System.out.println(tamanho);
-					byte[] bytes = new byte[1024];
-					String newPath = "view_"+winename+"."+extensao;
-					File newImage = new File(newPath);
-					newImage.createNewFile();
-					OutputStream outStreamImg = new FileOutputStream(newImage);
-			        int count;
-			        long total = 0;
-			        while ( (total < tamanho) && (count = this.in.read(bytes)) > 0 ) {
-			        	System.out.println("tamanho antes: "+total);
-			        	total += count;
-			        	//System.out.println(total);
-			        	//System.out.println((float)((total/tamanho)*100) + "%");
-			        	
-			            outStreamImg.write(bytes, 0, count);
-			            System.out.println("tamanho depois: "+total);
-			            System.out.println(tamanho);
-			        }
-			        /*
-			         * byte[] bytes = new byte[16*1024];
-							File newImage = new File(winepath);
-							newImage.createNewFile();
-							OutputStream outStreamImg = new FileOutputStream(newImage);
-					        int count;
-					        while ((count = inStream.read(bytes)) > 0) {
-					            outStreamImg.write(bytes, 0, count);
-					        }
-					        outStreamImg.close();
-					        outStream.writeObject(true);
-			         */
-			        System.out.println("fora cl");
-			        outStreamImg.close();
-			        System.out.println(newImage.getAbsolutePath());
-			        System.out.println(newImage.getPath());
-			        return info + "Imagem do vinho encontra-se em: "+ newPath + "\n";
-				}
-				
-				// devolve erro se não existir
-			else {
-				System.out.println("erro no servidor");
-			}
+			this.out.writeObject(winename);
+			String info = (String) this.in.readObject();
+			String extensao = (String) this.in.readObject();
+			long tamanho = (long) this.in.readObject();
+			byte[] bytes = new byte[1024];
+			String newPath = "view_"+winename+"."+extensao;
+			File newImage = new File(newPath);
+			newImage.createNewFile();
+			OutputStream outStreamImg = new FileOutputStream(newImage);
+	        int count;
+	        long total = 0;
+	        while ( (total < tamanho) && (count = this.in.read(bytes)) > 0 ) {
+	        	total += count;
+	            outStreamImg.write(bytes, 0, count);
+	        }
+	        outStreamImg.close();
+	        System.out.println("Abs:" + newImage.getAbsolutePath());
+	        System.out.println("normal "+newImage.getPath());
+	        return info + "Imagem do vinho encontra-se em: "+ newPath + "\n";
+		
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}

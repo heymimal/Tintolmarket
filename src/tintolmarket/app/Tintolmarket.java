@@ -2,7 +2,7 @@ package tintolmarket.app;
 
 import java.util.Scanner;
 
-import tintolmarket.app.client.Client_stub;
+import tintolmarket.app.client.ClientConector;
 
 /**
  * Classe Tintolmarket
@@ -10,7 +10,7 @@ import tintolmarket.app.client.Client_stub;
  * @author fc54446, fc54409, fc54933
  */
 public class Tintolmarket{
-	public static Client_stub c; //Conechao
+	public static ClientConector c; //Conechao
 	
 	public static void main(String[] args) {
 	
@@ -24,13 +24,13 @@ public class Tintolmarket{
 		username = args[1];
 		System.out.print("Por favor insira a sua password:");
 		password = sc.next();
-		c = new Client_stub(address,username, password);
+		c = new ClientConector(address,username, password);
 		
 	} else if(args.length == 3) {
 		address = args[0];
 		username = args[1];
 		password = args[2];
-		c = new Client_stub(address,username, password);
+		c = new ClientConector(address,username, password);
 	}
 	
 	//Se nao recebemos pass, pedir
