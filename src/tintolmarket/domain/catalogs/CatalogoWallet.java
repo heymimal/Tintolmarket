@@ -25,10 +25,7 @@ public class CatalogoWallet {
 	    
 	private static CatalogoWallet INSTANCE;
 	    
-	/**
-	 * @param o ????????
-	 * @return
-	 */
+	//SINGLETON
 	public static CatalogoWallet getInstance( Object o) {
 		if(o != null) {
 			CatalogoWallet.INSTANCE = new CatalogoWallet((ArrayList<Wallet>) o);
@@ -47,9 +44,9 @@ public class CatalogoWallet {
 	public Wallet getWalletUser(String username) {
 		synchronized (catWallet) {
 			for (Wallet w:catWallet) {
-			if(w.equals(username)) {
-				return w;
-			}
+				if(w.equals(username)) {
+					return w;
+				}
 		}
 		return null;
 		}
@@ -96,7 +93,7 @@ public class CatalogoWallet {
 	
 	
 	/**
-	 * Adicionar wallet a user (?)
+	 * Cria uma wallet e adiciona ao catalogo
 	 * 
 	 * @param username	utilizador ao qual se vai associar a wallet
 	 * @return true se for efetuado com sucesso, false caso contrario
