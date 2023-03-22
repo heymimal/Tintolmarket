@@ -12,6 +12,11 @@ import java.net.InetAddress;
 import java.net.Socket;
 import tintolmarket.domain.Operacao;
 
+/**
+ * Classe do Client_stub
+ * 
+ * @author fc54446, fc54409, fc54933
+ */
 public class Client_stub {
 	private String username;
 	private String pass;
@@ -19,6 +24,12 @@ public class Client_stub {
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 
+	/**
+	 * Construtor do Client_stub
+	 * 
+	 * @param username
+	 * @param pass
+	 */
 	public Client_stub(String username, String pass) {
 		//criar estruturas para conexão com servidor
 		//enviar username e pass para servidor
@@ -28,6 +39,10 @@ public class Client_stub {
 		
 	}
 	
+	/**
+	 * Conexao do Cliente
+	 * @return true se conectar, false se nao conectar, null se houver algum erro/excecao
+	 */
 	public Boolean connect() {//will receive values
 		try {
 			this.clientSocket = new Socket(InetAddress.getLocalHost(),12345);
@@ -46,6 +61,14 @@ public class Client_stub {
 		return null;
 	}
 	
+	
+	/**
+	 * Funcao para comunicar com o servidor acerca da operacao de adicionar vinho.
+	 * 
+	 * @param winename	  nome do vinho
+	 * @param wineimage	   imagem (caminho da imagem) do vinho	
+	 * @return true se o vinho for bem adicionado e imagem bem transferida, false caso aconteca um erro ou o vinho ja existir
+	 */
 	public boolean addwine(String winename, String wineimage) { //throws para ver + void -> String
 		try {
 			File file = new File(wineimage);
@@ -90,6 +113,16 @@ public class Client_stub {
 		
 	}
 
+	/**
+	 * Funcao para comunicar com o servidor acerca da operacao de vender vinho.
+	 * 
+	 * @param winename	  nome do vinho
+	 * @param winevalue		preco do vinho a vender		
+	 * @param winequantity	  quantidade a vender do vinho
+	 * 
+	 * @return	-1 se o vinho nao existe, 0 se existir mas com um preco diferente, 1 caso tenha sido realizado com sucesso, 
+	 * -2 em caso de erro
+	 */
 	public int sellwine(String winename, int winevalue, int winequantity) {
 		try {
 			this.out.writeObject(Operacao.SELL);
@@ -112,6 +145,11 @@ public class Client_stub {
 		return -2;
 	}
 
+	/**
+	 * Funcao para comunicar com o servidor acerca da operacao de ler as mensagens recebidas.
+	 * 
+	 * @return da mensagem recebida s, null em caso de erro.
+	 */
 	public String read() {
 		try {
 			this.out.writeObject(Operacao.TALK);
@@ -129,6 +167,14 @@ public class Client_stub {
 		
 }
 
+	/**
+	 * Funcao para comunicar com o servidor acerca da operacao de enviar mensagem para o utilizador.
+	 * 
+	 * @param username2		utilizador para o qual se vai enviar a mensagem
+	 * @param message		a mensagem enviada
+	 * 
+	 * @return true se a mensagem for bem enviada, false caso contrario
+	 */
 	public boolean talk(String username2, String message) {
 		// MANDAR MENSAGENS
 		try {
@@ -149,6 +195,13 @@ public class Client_stub {
 		
 	}
 
+	/**
+	 * Funcao para comunicar com o servidor acerca da operacao de avaliar/classificar os vinhos.
+	 * 
+	 * @param winename		nome do vinho a ser classificado
+	 * @param stars			classificacao atribuida
+	 * @return	true se a classificacao for bem efetuada, false caso contrario
+	 */
 	public boolean classify(String winename, int stars) {
 		try {
 			this.out.writeObject(Operacao.CLASSIFY);
@@ -172,6 +225,10 @@ public class Client_stub {
 		
 	}
 
+	/**Funcao para comunicar com o servidor acerca da operacao de consultar a waller/carteira de um utilizador.
+	 * 
+	 * @return o valor da wallet, -1 em caso de algum erro
+	 */
 	public int wallet() {
 		try {
 			this.out.writeObject(Operacao.WALLET);
@@ -188,6 +245,16 @@ public class Client_stub {
 		
 	}
 
+	/**
+	 * Funcao para comunicar com o servidor acerca da operacao de comprar unidades de vinho a dado utilizador.
+	 * 
+	 * @param winename		vinho a ser comprado
+	 * @param wineseller	vendedor do vinho
+	 * @param winequantity		quantidade de vinho a ser comprada
+	 * 
+	 * @return -4 se o wineseller nao existe, -3 se a winequantity nao esta disponivel, -2 se o utilizador comprador nao possui saldo
+	 * suficiente, -1 se o vinho winename nao existe, 1 caso a compra seja efetuada, -5 caso ocorra algum erro.
+	 */
 	public int buy(String winename, String wineseller, int winequantity) {
 		try {
 			this.out.writeObject(Operacao.BUY);
@@ -212,7 +279,14 @@ public class Client_stub {
 		
 		
 	}
-
+	
+	
+	/**
+	 * Funcao para comunicar com o servidor acerca da operacao de ver as informacoes associadas ao vinho winename.
+	 * 
+	 * @param winename	o vinho a ser visto
+	 * @return a informacao sobre o vinho e o caminho para a sua imagem, 'Erro' caso ocorra algum erro
+	 */
 	public String view(String winename) { // TO CHANGE
 		try {
 			this.out.writeObject(Operacao.VIEW);
@@ -279,18 +353,25 @@ public class Client_stub {
 		
 	}
 
-	public String getUsername() {
+	
+	/*public String getUsername() {
 		return username;
-	}
+	}*/
 
+	/**
+	 * @param username
+	 */
 	private void setUsername(String username) {
 		this.username = username;
 	}
 
-	public String getPass() {
+	/*public String getPass() {
 		return pass;
-	}
+	} */
 
+	/**
+	 * @param pass
+	 */
 	private void setPass(String pass) {
 		this.pass = pass;
 	}

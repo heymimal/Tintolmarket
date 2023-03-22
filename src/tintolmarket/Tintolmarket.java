@@ -4,6 +4,11 @@ import java.util.Scanner;
 
 import tintolmarket.client.Client_stub;
 
+/**
+ * Classe Tintolmarket
+ * 
+ * @author fc54446, fc54409, fc54933
+ */
 public class Tintolmarket{
 	public static Client_stub c; //Conechao
 	
@@ -18,7 +23,7 @@ public class Tintolmarket{
 		System.out.println("erro");
 	} else {
 	System.out.println("passou sem errar");
-	// depois de fazer conect, dar display das operações possiveis e começar a fazer
+	// depois de fazer conect, dar display das operacoes possiveis e comecar a fazer
 	Scanner sc = new Scanner(System.in);
 	System.out.println("Hello!");
 	System.out.print("insere: ");

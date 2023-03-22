@@ -5,9 +5,24 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 
+/**
+ * Classe MessageServer
+ * 
+ * @author fc54446, fc54409, fc54933
+ *
+ */
 public class MessageSaver {
+	
 private static final String SEPARAR = "/*-*/";
 	
+	/**
+	 * Escrever a mensagem
+	 * 
+	 * @param from	quem envia a mensagem
+	 * @param to	recetor da mensagem
+	 * @param mensagem	  a mensagem
+	 * @param bw	bufferedWriter
+	 */
 	public void addMensagem(String from, String to, String mensagem, BufferedWriter bw) {
 		try {
 			bw.write(to + SEPARAR + from + SEPARAR + mensagem);
@@ -18,6 +33,14 @@ private static final String SEPARAR = "/*-*/";
 		}
 	}
 	
+	/**
+	 * Receber as mensagens do utilizador user
+	 * 
+	 * @param user	o utilizador
+	 * @param br	bufferedReader
+	 * @param messagePath	caminho da mensagem
+	 * @return	a mensagem do user, null caso ocorra algum erro (duvidas!!!!!!!!!)
+	 */
 	public String getMensagensbyUser(String user, BufferedReader br, String messagePath) {
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sbtemp = new StringBuilder();

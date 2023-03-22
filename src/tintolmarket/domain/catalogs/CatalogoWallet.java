@@ -6,9 +6,14 @@ import java.util.List;
 import tintolmarket.domain.Wallet;
 
 
+/**
+ * Catalogo de Wallets
+ * 
+ * @author fc54446, fc54409, fc54933
+ *
+ */
 public class CatalogoWallet {
 	private List<Wallet> catWallet;
-	
 	
 	private CatalogoWallet() {
 		this.catWallet = new ArrayList<>();
@@ -20,6 +25,10 @@ public class CatalogoWallet {
 	    
 	private static CatalogoWallet INSTANCE;
 	    
+	/**
+	 * @param o ????????
+	 * @return
+	 */
 	public static CatalogoWallet getInstance( Object o) {
 		if(o != null) {
 			CatalogoWallet.INSTANCE = new CatalogoWallet((ArrayList<Wallet>) o);
@@ -29,6 +38,12 @@ public class CatalogoWallet {
 	     return INSTANCE;
 	}
 	
+	/**
+	 * Wallet do utilizador username
+	 * 
+	 * @param username	utilizador
+	 * @return wallet do utilizador, null caso essa wallet nao exista
+	 */
 	public Wallet getWalletUser(String username) {
 		synchronized (catWallet) {
 			for (Wallet w:catWallet) {
@@ -40,6 +55,14 @@ public class CatalogoWallet {
 		}
 		
 	}
+	
+	
+	/**
+	 * Valor da Wallet do utilizador username
+	 * 
+	 * @param username	utilizador
+	 * @return	-1 se o username nao tem wallet (?) associada, caso contrario o valor da sua wallet
+	 */
 	public int getWalletValue(String username) {
 		synchronized (catWallet) {
 		for (Wallet w:catWallet) {
@@ -51,6 +74,13 @@ public class CatalogoWallet {
 		}
 		
 	}
+	
+	
+	/**
+	 * Atualizacao do valor da wallet
+	 * 
+	 * @param walletUser	utilizador associado a wallet
+	 */
 	public void changeWallet(Wallet walletUser) {
 		synchronized (catWallet) {
 			for(int i = 0; i < this.catWallet.size();i++) {
@@ -63,6 +93,14 @@ public class CatalogoWallet {
 		}
 		
 	}
+	
+	
+	/**
+	 * Adicionar wallet a user (?)
+	 * 
+	 * @param username	utilizador ao qual se vai associar a wallet
+	 * @return true se for efetuado com sucesso, false caso contrario
+	 */
 	public boolean addWallet(String username) {
 		synchronized (catWallet) {
 			return this.catWallet.add(new Wallet(username));
@@ -70,6 +108,10 @@ public class CatalogoWallet {
 		
 	}
 
+	/**
+	 * 
+	 * @return lista de wallets/catalogo de wallets
+	 */
 	public List<Wallet> getList() {
 		synchronized (catWallet) {
 			return this.catWallet;

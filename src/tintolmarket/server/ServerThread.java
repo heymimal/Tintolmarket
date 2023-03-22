@@ -18,6 +18,12 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+/**
+ * Classe ServerThread
+ * 
+ *  @author fc54446, fc54409, fc54933
+ *
+ */
 public class ServerThread extends Thread {
 
 	private Socket socket = null;
@@ -26,6 +32,12 @@ public class ServerThread extends Thread {
 	private MessageHandler mh;
 	//will have mutex for access to .txt files and possibly others
 
+	/**
+	 * Construtor do ServerThread
+	 * @param inSoc 	socket
+	 * @param wh 	handler dos vinhos
+	 * @param mh 	handler das mensagens
+	 */
 	public ServerThread(Socket inSoc, WineHandler wh, MessageHandler mh) {
 		socket = inSoc;
 		this.wh = wh;

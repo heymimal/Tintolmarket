@@ -16,6 +16,11 @@ import tintolmarket.handlers.WineHandler;
 
 
 
+/**
+ * Classe Server
+ * @author fc54446, fc54409, fc54933
+ *
+ */
 public class Server {
 	
 	public static final String users = "users.txt";
@@ -29,6 +34,9 @@ public class Server {
 		server.startServer();
 	}
 
+	/**
+	 * Start the server
+	 */
 	public void startServer (){ //will receive values
 		ServerSocket sSoc = null;
 		WineHandler wh = null;
