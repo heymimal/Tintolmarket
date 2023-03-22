@@ -99,6 +99,9 @@ public class Server {
 			if(usersFile.createNewFile()) {
 				System.out.println("users file created");
 			}
+			if(messagesFile.createNewFile()) {
+				System.out.println("Messages file created");
+			}
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);

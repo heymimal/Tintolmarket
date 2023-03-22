@@ -95,11 +95,9 @@ public class Client_stub {
 		try {
 			File file = new File(wineimage);
 			if(file.exists()) {
-				System.out.println("Existe");
 				this.out.writeObject(Operacao.ADD);
 				boolean b = (boolean) this.in.readObject();
 				if (b) {
-					System.out.println("pedido reconhecido");
 					this.out.writeObject(winename);
 					this.out.writeObject(wineimage);
 					boolean resposta = (boolean) this.in.readObject();
@@ -114,10 +112,8 @@ public class Client_stub {
 				            this.out.write(bytes, 0, count);
 				            this.out.flush();
 				        }
-				        System.out.println("hello");
 				        inF.close();
 				        boolean resposta2 = (boolean) this.in.readObject();
-				        System.out.println("resposta chegou");
 				        return resposta2;
 					}
 					return resposta;
@@ -127,6 +123,7 @@ public class Client_stub {
 					System.out.println("erro no servidor");
 				}
 			}
+			System.out.println("Ficheiro nao existe.");
 			
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
@@ -360,7 +357,7 @@ public class Client_stub {
 			        outStreamImg.close();
 			        System.out.println(newImage.getAbsolutePath());
 			        System.out.println(newImage.getPath());
-			        return info + "\n Imagem do vinho encontra-se em: "+ newPath;
+			        return info + "Imagem do vinho encontra-se em: "+ newPath + "\n";
 				}
 				
 				// devolve erro se não existir

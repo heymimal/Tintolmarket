@@ -44,11 +44,13 @@ private static final String SEPARAR = "/*-*/";
 		StringBuilder sb = new StringBuilder();
 		StringBuilder sbtemp = new StringBuilder();
 		String check;
+		boolean exists = false;
 		try {
 			while((check = br.readLine()) != null) {
 				String[] temp = check.split(SEPARAR);
 				if(temp[0].equals(user)) {
 					sb.append(temp[2]+":"+temp[4]+ "\n");
+					exists = true;
 				} else {
 					sbtemp.append(check + "\n");
 				}
@@ -59,7 +61,11 @@ private static final String SEPARAR = "/*-*/";
 			bw.write(sbtemp.toString());
 			bw.close();
 			fw.close();
-			return sb.toString();
+			if(exists) {
+				return "Mensagens: \n" + sb.toString();
+			} else {
+				return "Nao tens mensagens para ler";
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
