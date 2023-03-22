@@ -23,8 +23,8 @@ public class MessageHandler {
 	/**
 	 * Construtor do Handler
 	 * 
-	 * @param usersPath		path dos users
-	 * @param messagesPath	path das mensagens
+	 * @param usersPath		path do ficheiro dos users
+	 * @param messagesPath	path do ficheiro das mensagens
 	 */
 	public MessageHandler(String usersPath, String messagesPath) {
 		this.setUsersPath(usersPath);
@@ -39,7 +39,7 @@ public class MessageHandler {
 	 * @param from	quem envia a mensagem
 	 * @param to	recetor da mensagem
 	 * @param mensagem	a mensagem
-	 * @return true se o user destinatario foi encontrado/existe, false caso contrario
+	 * @return true se o user destinatario foi encontrado/existe e a mensagem foi guardado, false caso contrario
 	 */
 	public boolean addMensagem(String from, String to, String mensagem) {
 		FileReader fr;
@@ -76,10 +76,10 @@ public class MessageHandler {
 	}
 	
 	/**
-	 * Ler mensagens por cada utilizador
+	 * Le as mensagens do utilizador user
 	 * 
 	 * @param user	o utilizador
-	 * @return	a mensagem, null caso ocorra algum erro
+	 * @return	as mensagens, null caso ocorra algum erro
 	 */
 	public String readMessagesbyUser(String user) {
 		FileReader fr;
@@ -92,34 +92,33 @@ public class MessageHandler {
 			
 			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 		
 	}
 	/**
-	 * @return path das mensagens
+	 * @return path do ficheiro das mensagens
 	 */
 	public String getMessagesPath() {
 		return messagesPath;
 	}
 	/**
-	 * @param messagesPath	path das mensagens
+	 * @param messagesPath	path do ficheiro das mensagens
 	 */
 	public void setMessagesPath(String messagesPath) {
 		this.messagesPath = messagesPath;
 	}
 	
 	/**
-	 * @return path dos users
+	 * @return path do ficheiro dos users
 	 */
 	public String getUsersPath() {
 		return usersPath;
 	}
 	
 	/**
-	 * @param usersPath		path dos users
+	 * @param usersPath		path do ficheiro dos users
 	 */
 	public void setUsersPath(String usersPath) {
 		this.usersPath = usersPath;
