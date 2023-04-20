@@ -1,4 +1,5 @@
 package tintolmarket.app.server;
+import tintolmarket.app.security.Cifra_Server;
 import tintolmarket.domain.*;
 import tintolmarket.handlers.*;
 
@@ -65,6 +66,7 @@ public class ServerThread extends Thread {
 					boolean found = isconnected[1];
 					if(checkAuth &&!found) {
 						this.wh.addWalletUser(user);
+						this.mh.addUser(user);
 					}
 					outStream.writeObject(checkAuth);
 					connected = checkAuth;

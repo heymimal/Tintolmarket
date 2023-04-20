@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
+import tintolmarket.app.security.Cifra_Server;
 import tintolmarket.domain.Wine;
 import tintolmarket.handlers.MessageHandler;
 import tintolmarket.handlers.WineHandler;
@@ -74,7 +76,7 @@ public class Server {
 		SSLServerSocket ss = null;
 
 		WineHandler wh = null;
-		MessageHandler mh = new MessageHandler(users,messages);
+		MessageHandler mh = null;
 		System.out.println(PORT);
         
 		try {
@@ -127,6 +129,10 @@ public class Server {
 			if(usersFile.createNewFile()) {
 				auth.encryptUsers(null);
 				System.out.println("users file created");
+				mh = new MessageHandler(users,messages,null);
+			} else {
+				List<String> allUsers = auth.getAllUsers();
+				mh = new MessageHandler(users,messages,allUsers);
 			}
 			if(messagesFile.createNewFile()) {
 				System.out.println("Messages file created");
