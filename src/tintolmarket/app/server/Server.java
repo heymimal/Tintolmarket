@@ -31,6 +31,8 @@ public class Server {
 	public static final String wines = "wines.txt";
 	public static final String wallet = "wallet.txt";
 	public static final String messages = "messages.txt";
+
+	public Autenticar auth = new Autenticar("password");
 	
 	public static void main(String[] args) {
 		System.setProperty("javax.net.ssl.keyStore"
@@ -113,6 +115,7 @@ public class Server {
 			}
 			
 			if(usersFile.createNewFile()) {
+				auth.encryptUsers(null);
 				System.out.println("users file created");
 			}
 			if(messagesFile.createNewFile()) {
@@ -130,7 +133,7 @@ public class Server {
 				//Socket inSoc = sSoc.accept();
 				Socket inSoc = ss.accept();
 				System.out.println("Connection Established");
-				new ServerThread(inSoc,wh,mh).start();
+				new ServerThread(inSoc,wh,mh, auth).start();
 				//newServerThread.start();
 		    }
 		    catch (IOException e) {
