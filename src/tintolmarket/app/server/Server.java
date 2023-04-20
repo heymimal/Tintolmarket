@@ -14,6 +14,9 @@ import tintolmarket.domain.Wine;
 import tintolmarket.handlers.MessageHandler;
 import tintolmarket.handlers.WineHandler;
 
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 
 
 /**
@@ -28,16 +31,37 @@ public class Server {
 	public static final String wines = "wines.txt";
 	public static final String wallet = "wallet.txt";
 	public static final String messages = "messages.txt";
+
+	public Autenticar auth = new Autenticar("password");
 	
 	public static void main(String[] args) {
+		System.setProperty("javax.net.ssl.keyStore"
+				,
+				"keystore.server");
+		System.setProperty("javax.net.ssl.keyStorePassword"
+				, "keypass");
+
 		System.out.println("servidor: main tintol");
 		Server server = new Server();
+
+		String port;
+		String passCifra = null;
+		String keyStore = null;
+		String passKeyStore = null;
+
 		try {
-			if(args.length != 0) {
+			if(args.length == 4){
+				port = args[0];
+				passCifra = args[1];
+				keyStore = args[2];
+				passKeyStore = args[3];
 				server.startServer(Integer.parseInt(args[0]));
-			} else {
-				server.startServer(PORT_DEFAULT);
+			}else{
+				System.out.println("Comando para correr servidor estah incorreto. \n" +
+						"Para correr corretamente eh necessario : <port> <password-cifra> <keystore> <password-keystore>. \n" +
+						"Por exemplo : 12345 passDeExemplo nomeKeyStore passKeyStore");
 			}
+
 		} catch (Exception e) {
 			System.exit(0);
 		}
@@ -47,13 +71,19 @@ public class Server {
 	 * Start the server
 	 */
 	public void startServer (int PORT){ //will receive values
-		ServerSocket sSoc = null;
+		//ServerSocket sSoc = null;
+
+		ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
+		SSLServerSocket ss = null;
+
 		WineHandler wh = null;
 		MessageHandler mh = new MessageHandler(users,messages);
 		System.out.println(PORT);
         
 		try {
-			sSoc = new ServerSocket(PORT);
+			//sSoc = new ServerSocket(PORT);
+			ss = (SSLServerSocket) ssf.createServerSocket(PORT);
+
 			File winesFile = new File(wines);
 			File messagesFile = new File(messages);
 			File usersFile = new File(users);
@@ -98,6 +128,7 @@ public class Server {
 			}
 			
 			if(usersFile.createNewFile()) {
+				auth.encryptUsers(null);
 				System.out.println("users file created");
 			}
 			if(messagesFile.createNewFile()) {
@@ -112,9 +143,10 @@ public class Server {
 		}
 		while(true) { // change for multiple clients
 			try {
-				Socket inSoc = sSoc.accept();
+				//Socket inSoc = sSoc.accept();
+				Socket inSoc = ss.accept();
 				System.out.println("Connection Established");
-				new ServerThread(inSoc,wh,mh).start();
+				new ServerThread(inSoc,wh,mh, auth).start();
 				//newServerThread.start();
 		    }
 		    catch (IOException e) {

@@ -11,6 +11,11 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import tintolmarket.domain.Operacao;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
 /**
  * Classe do Client_stub
  * 
@@ -19,29 +24,38 @@ import tintolmarket.domain.Operacao;
 public class ClientConector {
 	private final String PORT_DEFAULT = "12345";
 	private String username;
-	private String pass;
+	private String truststore;
+	private String keystore;
+	private String passKeyStore;
 	private String[] address;
-	private Socket clientSocket;
+	//private Socket clientSocket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
+
+	SocketFactory sf = SSLSocketFactory.getDefault();
+	private SSLSocket clientSocket;
 
 	/**
 	 * Construtor do Client_stub
 	 * 
+	 * @param address
+	 * @param truststore
+	 * @param keystore
+	 * @param passKeyStore
 	 * @param username
-	 * @param pass
-	 * @param password 
 	 */
-	public ClientConector(String address, String username, String password) {
+	public ClientConector(String address, String truststore, String keystore, String passKeyStore, String username) {
 		//criar estruturas para conexão com servidor
 		//enviar username e pass para servidor
 		this.address = setAddress(address);
+		setTrustStore(truststore);
+		setKeyStore(keystore);
+		setPassKeyStore(passKeyStore);
 		setUsername(username);
-		setPass(password);
 		clientSocket = null;
 		
 	}
-	
+
 	private String[] setAddress(String address) {
 		// TODO Auto-generated method stub
 		String[] returnv = new String [2];
@@ -67,12 +81,12 @@ public class ClientConector {
 	public Boolean connect() {//will receive values
 		try {
 			
-			this.clientSocket = new Socket(this.address[0],Integer.parseInt(this.address[1]));
+			//this.clientSocket = new Socket(this.address[0],Integer.parseInt(this.address[1]));
+			this.clientSocket = (SSLSocket) sf.createSocket(this.address[0],Integer.parseInt(this.address[1]));
 			this.out = new ObjectOutputStream(clientSocket.getOutputStream());
 			this.in = new ObjectInputStream(clientSocket.getInputStream());
 			
 			this.out.writeObject(this.username);
-			this.out.writeObject(this.pass);
 			
 			Boolean b = (Boolean) this.in.readObject();
 			return b;
@@ -345,17 +359,17 @@ public class ClientConector {
 		this.username = username;
 	}
 
-	/*public String getPass() {
-		return pass;
-	} */
-
-	/**
-	 * @param pass
-	 */
-	private void setPass(String pass) {
-		this.pass = pass;
+	private void setPassKeyStore(String passKeyStore) {
+		this.passKeyStore = passKeyStore;
 	}
 
+	private void setKeyStore(String keystore) {
+		this.keystore = keystore;
+	}
+
+	private void setTrustStore(String truststore) {
+		this.truststore = truststore;
+	}
 	
 
 }
