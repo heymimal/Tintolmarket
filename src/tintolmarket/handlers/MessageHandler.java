@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import tintolmarket.domain.MessageSaver;
 
@@ -19,6 +20,8 @@ public class MessageHandler {
 	private String usersPath;
 	private String messagesPath;
 	private MessageSaver mst;
+
+	private List<String> allUsers;
 	
 	/**
 	 * Construtor do Handler
@@ -26,10 +29,11 @@ public class MessageHandler {
 	 * @param usersPath		path do ficheiro dos users
 	 * @param messagesPath	path do ficheiro das mensagens
 	 */
-	public MessageHandler(String usersPath, String messagesPath) {
-		this.setUsersPath(usersPath);
+	public MessageHandler(String usersPath, String messagesPath,List<String> allUsers) {
+		//this.setUsersPath(usersPath);
 		this.setMessagesPath(messagesPath);
 		this.mst = new MessageSaver();
+		this.allUsers = allUsers;
 	}
 	
 	
@@ -109,20 +113,9 @@ public class MessageHandler {
 	public void setMessagesPath(String messagesPath) {
 		this.messagesPath = messagesPath;
 	}
-	
-	/**
-	 * @return path do ficheiro dos users
-	 */
-	public String getUsersPath() {
-		return usersPath;
-	}
-	
-	/**
-	 * @param usersPath		path do ficheiro dos users
-	 */
-	public void setUsersPath(String usersPath) {
-		this.usersPath = usersPath;
-	}
 
 
+	public void addUser(String user) {
+		this.allUsers.add(user);
+	}
 }
