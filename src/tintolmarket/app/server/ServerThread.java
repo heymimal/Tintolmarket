@@ -61,10 +61,11 @@ public class ServerThread extends Thread {
 			try {
 				user = (String)inStream.readObject();
 
-				passwd = (String)inStream.readObject();
+				//passwd = (String)inStream.readObject();
 
 				System.out.println("thread: depois de receber o user");
 				if (user.length() != 0){
+					outStream.writeObject(true);
 
 					String crttemp = auth.decryptUsers(user,null);
 //>>>>>>> Cifrar_Users
