@@ -71,7 +71,7 @@ public class Cifra_Server {
                 FileOutputStream fis = new FileOutputStream(file);
                 fis.write(cert.getEncoded());
                 fis.close();
-                decryptUsers(user, user+":"+filename);
+                decryptUsers(user, user+":"+filename+"\n");
             }
 
             return booleanArray;

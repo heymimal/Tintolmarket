@@ -129,7 +129,7 @@ public class Server {
 			if(usersFile.createNewFile()) {
 				auth.encryptUsers(null);
 				System.out.println("users file created");
-				mh = new MessageHandler(users,messages,null);
+				mh = new MessageHandler(users,messages,new ArrayList<>());
 			} else {
 				List<String> allUsers = auth.getAllUsers();
 				mh = new MessageHandler(users,messages,allUsers);

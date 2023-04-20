@@ -17,7 +17,7 @@ import tintolmarket.domain.MessageSaver;
  */
 public class MessageHandler {
 	
-	private String usersPath;
+	//private String usersPath;
 	private String messagesPath;
 	private MessageSaver mst;
 
@@ -46,37 +46,24 @@ public class MessageHandler {
 	 * @return true se o user destinatario foi encontrado/existe e a mensagem foi guardado, false caso contrario
 	 */
 	public boolean addMensagem(String from, String to, String mensagem) {
-		FileReader fr;
-		try {
-			fr = new FileReader(this.usersPath);
-			BufferedReader br = new BufferedReader(fr);
-			String check;
-			boolean found = false;
-			while((check = br.readLine())!= null) {
-				String[] splt = check.split(":");
-				if(splt[0].equals(to)) {
-					FileWriter fw = new FileWriter(this.messagesPath, true);
-					BufferedWriter bw = new BufferedWriter(fw);
-					synchronized (mst) {
-						mst.addMensagem(from, to, mensagem, bw);
-					}
-					
+
+		boolean toExists = this.allUsers.contains(from);
+		try{
+			if(toExists){
+				FileWriter fw = new FileWriter(this.messagesPath, true);
+				BufferedWriter bw = new BufferedWriter(fw);
+				synchronized (mst) {
+					mst.addMensagem(from, to, mensagem, bw);
 					bw.close();
 					fw.close();
-					found = true;
-					break;
 				}
+
 			}
-			br.close();
-			fr.close();
-			return found;
-			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return false;
-		
+
+		return toExists;
 	}
 	
 	/**
@@ -93,8 +80,7 @@ public class MessageHandler {
 			synchronized (mst) {
 				return mst.getMensagensbyUser(user, br, this.messagesPath);
 			}
-			
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
