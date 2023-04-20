@@ -10,8 +10,15 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.security.*;
+import java.security.cert.CertificateException;
+
 import tintolmarket.domain.Operacao;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -28,12 +35,11 @@ public class ClientConector {
 	private String keystore;
 	private String passKeyStore;
 	private String[] address;
-	//private Socket clientSocket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
-
-	SocketFactory sf = SSLSocketFactory.getDefault();
 	private SSLSocket clientSocket;
+
+	private Cifra_Cliente cifraCliente;
 
 	/**
 	 * Construtor do Client_stub
@@ -52,12 +58,14 @@ public class ClientConector {
 		setKeyStore(keystore);
 		setPassKeyStore(passKeyStore);
 		setUsername(username);
+		this.cifraCliente = new Cifra_Cliente(keystore,passKeyStore,username,truststore);
+
+
 		clientSocket = null;
 		
 	}
 
 	private String[] setAddress(String address) {
-		// TODO Auto-generated method stub
 		String[] returnv = new String [2];
 		if(address.contains(":")) {
 			
@@ -79,6 +87,7 @@ public class ClientConector {
 	 * @return true se conectar, false se nao conectar, null se houver algum erro/excecao
 	 */
 	public Boolean connect() {//will receive values
+		SocketFactory sf = SSLSocketFactory.getDefault();
 		try {
 			
 			//this.clientSocket = new Socket(this.address[0],Integer.parseInt(this.address[1]));
@@ -89,12 +98,15 @@ public class ClientConector {
 			this.out.writeObject(this.username);
 			
 			Boolean b = (Boolean) this.in.readObject();
-			return b;
+			if(b){
+				return cifraCliente.autenticaCliente(in,out);
+			}
+
 		}catch (IOException | ClassNotFoundException e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);
 		}
-		return null;
+		return false;
 	}
 	
 	
