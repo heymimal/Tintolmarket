@@ -35,7 +35,7 @@ public class Server {
 	public static void main(String[] args) {
 		System.setProperty("javax.net.ssl.keyStore"
 				,
-				"keystore2.server");
+				"keystore.server");
 		System.setProperty("javax.net.ssl.keyStorePassword"
 				, "keypass");
 
