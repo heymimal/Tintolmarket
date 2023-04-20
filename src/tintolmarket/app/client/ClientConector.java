@@ -11,6 +11,11 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import tintolmarket.domain.Operacao;
+
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+
 /**
  * Classe do Client_stub
  * 
@@ -21,15 +26,18 @@ public class ClientConector {
 	private String username;
 	private String pass;
 	private String[] address;
-	private Socket clientSocket;
+	//private Socket clientSocket;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
+
+	SocketFactory sf = SSLSocketFactory.getDefault();
+	private SSLSocket clientSocket;
 
 	/**
 	 * Construtor do Client_stub
 	 * 
 	 * @param username
-	 * @param pass
+	 * @param address
 	 * @param password 
 	 */
 	public ClientConector(String address, String username, String password) {
@@ -65,9 +73,15 @@ public class ClientConector {
 	 * @return true se conectar, false se nao conectar, null se houver algum erro/excecao
 	 */
 	public Boolean connect() {//will receive values
+		System.setProperty("javax.net.ssl.trustStore"
+				,
+				"truststore");
+		System.setProperty("javax.net.ssl.trustStorePassword"
+				, "keypass");
 		try {
 			
-			this.clientSocket = new Socket(this.address[0],Integer.parseInt(this.address[1]));
+			//this.clientSocket = new Socket(this.address[0],Integer.parseInt(this.address[1]));
+			this.clientSocket = (SSLSocket) sf.createSocket(this.address[0],Integer.parseInt(this.address[1]));
 			this.out = new ObjectOutputStream(clientSocket.getOutputStream());
 			this.in = new ObjectInputStream(clientSocket.getInputStream());
 			

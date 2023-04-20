@@ -14,6 +14,9 @@ import tintolmarket.domain.Wine;
 import tintolmarket.handlers.MessageHandler;
 import tintolmarket.handlers.WineHandler;
 
+import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 
 
 /**
@@ -30,6 +33,12 @@ public class Server {
 	public static final String messages = "messages.txt";
 	
 	public static void main(String[] args) {
+		System.setProperty("javax.net.ssl.keyStore"
+				,
+				"keystore");
+		System.setProperty("javax.net.ssl.keyStorePassword"
+				, "keypass");
+
 		System.out.println("servidor: main tintol");
 		Server server = new Server();
 		try {
@@ -47,13 +56,19 @@ public class Server {
 	 * Start the server
 	 */
 	public void startServer (int PORT){ //will receive values
-		ServerSocket sSoc = null;
+		//ServerSocket sSoc = null;
+
+		ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();
+		SSLServerSocket ss = null;
+
 		WineHandler wh = null;
 		MessageHandler mh = new MessageHandler(users,messages);
 		System.out.println(PORT);
         
 		try {
-			sSoc = new ServerSocket(PORT);
+			//sSoc = new ServerSocket(PORT);
+			ss = (SSLServerSocket) ssf.createServerSocket(PORT);
+
 			File winesFile = new File(wines);
 			File messagesFile = new File(messages);
 			File usersFile = new File(users);
@@ -112,7 +127,8 @@ public class Server {
 		}
 		while(true) { // change for multiple clients
 			try {
-				Socket inSoc = sSoc.accept();
+				//Socket inSoc = sSoc.accept();
+				Socket inSoc = ss.accept();
 				System.out.println("Connection Established");
 				new ServerThread(inSoc,wh,mh).start();
 				//newServerThread.start();
