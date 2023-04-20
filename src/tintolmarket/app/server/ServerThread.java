@@ -60,12 +60,14 @@ public class ServerThread extends Thread {
 			String passwd = null;
 			try {
 				user = (String)inStream.readObject();
+
 				passwd = (String)inStream.readObject();
 
 				System.out.println("thread: depois de receber o user");
 				if (user.length() != 0){
 
 					String crttemp = auth.decryptUsers(user,null);
+//>>>>>>> Cifrar_Users
 					boolean found = false;
 					if(crttemp.isEmpty()){
 						// Utilizador ainda não foi adicionado

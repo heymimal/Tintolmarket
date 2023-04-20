@@ -10,7 +10,7 @@ import tintolmarket.app.client.ClientConector;
  * @author fc54446, fc54409, fc54933
  */
 public class Tintolmarket{
-	public static ClientConector c; //Conechao
+	public static ClientConector c; //Conexao
 	
 	public static void main(String[] args) {
 		System.setProperty("javax.net.ssl.trustStore"
@@ -20,22 +20,25 @@ public class Tintolmarket{
 				, "trustpass");
 	
 		String address;
+		String truststore;
+		String keystore;
+		String passKeyStore;
 		String username = null;
-		String password;
 		Scanner sc = new Scanner(System.in);
 		
-	if(args.length == 2) {
+	if(args.length == 5) {
 		address = args[0];
-		username = args[1];
-		System.out.print("Por favor insira a sua password:");
-		password = sc.next();
-		c = new ClientConector(address,username, password);
-		
-	} else if(args.length == 3) {
-		address = args[0];
-		username = args[1];
-		password = args[2];
-		c = new ClientConector(address,username, password);
+		truststore = args[1];
+		keystore = args[2];
+		passKeyStore = args[3];
+		username = args[4];
+		System.out.println("tem de correr");
+		c = new ClientConector(address,truststore, keystore, passKeyStore, username);
+
+	} else {
+		System.out.println("Comando para conectar ao servidor estah incorreto. \n" +
+				"Para conectar corretamente eh necessario : <serverAddress> <truststore> <keystore> <password-keystore> <userID>. \n" +
+				"Por exemplo : localhost:12345 nomeTruststore nomeKeyStore passKeyStore utilizador");
 	}
 	
 	//Se nao recebemos pass, pedir
