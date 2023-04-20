@@ -3,19 +3,17 @@ import tintolmarket.domain.*;
 import tintolmarket.handlers.*;
 
 //import tintolmarket.server.*;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import javax.crypto.NoSuchPaddingException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Classe ServerThread
@@ -30,7 +28,7 @@ public class ServerThread extends Thread {
 	private WineHandler wh;
 	private MessageHandler mh;
 
-	private Autenticar auth;
+	private Cifra_Server auth;
 	//will have mutex for access to .txt files and possibly others
 
 	/**
@@ -41,7 +39,7 @@ public class ServerThread extends Thread {
      * @param mh    handler das mensagens
      * @param auth
      */
-	public ServerThread(Socket inSoc, WineHandler wh, MessageHandler mh, Autenticar auth) {
+	public ServerThread(Socket inSoc, WineHandler wh, MessageHandler mh, Cifra_Server auth) {
 		socket = inSoc;
 		this.wh = wh;
 		this.mh = mh;
@@ -51,51 +49,27 @@ public class ServerThread extends Thread {
 
 	@Override
 	public void run(){
-		boolean connected;
+		boolean connected = false;
 		try {
 			ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 			ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
 
 			String user = null;
-			String passwd = null;
 			try {
 				user = (String)inStream.readObject();
-
-				//passwd = (String)inStream.readObject();
-
 				System.out.println("thread: depois de receber o user");
 				if (user.length() != 0){
 					outStream.writeObject(true);
-
-					String crttemp = auth.decryptUsers(user,null);
-//>>>>>>> Cifrar_Users
-					boolean found = false;
-					if(crttemp.isEmpty()){
-						// Utilizador ainda não foi adicionado
-
-					} else {
-						found = true;
+					boolean[] isconnected = auth.serverAutenticate(outStream,inStream,user);
+					boolean checkAuth = isconnected[0];
+					boolean found = isconnected[1];
+					if(checkAuth &&!found) {
+						this.wh.addWalletUser(user);
 					}
-					FileReader fr = new FileReader(Server.users);
-					BufferedReader br = new BufferedReader(fr);
-					if(!found) {
-						/*FileWriter fw = new FileWriter(Server.users, true);
-						BufferedWriter bw = new BufferedWriter(fw);
-						bw.write(user+":"+passwd);
-						bw.newLine();
-						this.wh.addWalletUser(user);*/
-						outStream.writeObject(false);
-						//bw.close();
-						//fw.close();
-					}
-					else {
-						outStream.writeObject(true);
-					}
-					fr.close();
-					br.close();
-					//verificação
+					outStream.writeObject(checkAuth);
+					connected = checkAuth;
 				}
-				connected = true;
+
 				while(connected) {
 					System.out.println("Waiting for op...");
 					this.op = (Operacao)inStream.readObject();
@@ -200,6 +174,10 @@ public class ServerThread extends Thread {
 
 			} catch (IOException e1) {
 				connected = false;
+			} catch (NoSuchPaddingException e) {
+				throw new RuntimeException(e);
+			} catch (NoSuchAlgorithmException e) {
+				throw new RuntimeException(e);
 			}
 		}catch (ClassNotFoundException | IOException e1) {
 			//e1.printStackTrace();

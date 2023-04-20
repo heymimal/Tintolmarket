@@ -2,12 +2,9 @@ package tintolmarket.app.server;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 
 import tintolmarket.domain.Wine;
@@ -32,7 +29,7 @@ public class Server {
 	public static final String wallet = "wallet.txt";
 	public static final String messages = "messages.txt";
 
-	public Autenticar auth = new Autenticar("password");
+	public Cifra_Server auth = new Cifra_Server("password");
 	
 	public static void main(String[] args) {
 		System.setProperty("javax.net.ssl.keyStore"

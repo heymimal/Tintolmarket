@@ -4,13 +4,15 @@ import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.*;
 import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
 
-public class Autenticar {
+public class Cifra_Server {
 
     private String password;
 
-    public Autenticar(String password){
+    public Cifra_Server(String password){
         this.password = password;
     }
 
@@ -24,6 +26,70 @@ public class Autenticar {
         SecureRandom sr = new SecureRandom();
         sr.nextBytes(salt);
         return salt;
+    }
+
+    public boolean[] serverAutenticate(ObjectOutputStream outStream, ObjectInputStream inStream, String user) throws NoSuchPaddingException, NoSuchAlgorithmException {
+        //String crttemp = auth.decryptUsers(user,null);
+        boolean[] booleanArray = new boolean[2];
+        String crttemp = decryptUsers(user,null);
+        try{
+            boolean found = false;
+            if(!crttemp.isBlank()) {
+                found = true;
+            }
+            double nonce = generateNonce();
+            outStream.writeObject(nonce);
+
+            outStream.writeObject(found);
+            Cipher c = Cipher.getInstance("RSA");
+            double nonce_client;
+            byte[] nonce_encoded;
+            java.security.cert.Certificate cert;
+            //String certpth = user+"cert.pub";
+            if(!found){
+                nonce_client = (double) inStream.readObject();
+                nonce_encoded = (byte[])inStream.readObject();
+                cert = (java.security.cert.Certificate)inStream.readObject();
+
+            } else {
+                nonce_client = (double) inStream.readObject();
+                nonce_encoded = (byte[])inStream.readObject();
+
+                FileInputStream fis = new FileInputStream(crttemp);
+                CertificateFactory cf = CertificateFactory.getInstance("X509");
+                cert = cf.generateCertificate(fis);
+            }
+            boolean equalNonce = nonce==nonce_client;
+            Key publickeyuser = cert.getPublicKey();
+
+            c.init(Cipher.DECRYPT_MODE, publickeyuser);
+
+            byte[] nonce_decoded = c.doFinal(nonce_encoded);
+
+            double decryptedN = Double.parseDouble(new String(nonce_decoded));
+            boolean decode = nonce == decryptedN;
+
+            boolean checkAuth = decode && equalNonce;
+            System.out.println(checkAuth);
+            booleanArray[0]=checkAuth;
+            booleanArray[1]=found;
+            if(checkAuth && !found){
+                String filename = user+"serverCert.cer";
+
+                File file = new File(filename);
+
+                FileOutputStream fis = new FileOutputStream(file);
+                fis.write(cert.getEncoded());
+                fis.close();
+                decryptUsers(user, user+":"+filename);
+            }
+
+            return booleanArray;
+
+        }catch (IOException | ClassNotFoundException | CertificateException | BadPaddingException |
+                IllegalBlockSizeException | InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String decryptUsers(String user, String newLineToAdd){
@@ -85,49 +151,6 @@ public class Autenticar {
                  InvalidKeyException e) {
             throw new RuntimeException(e);
         }
-
-        /*
-        Cipher c = Cipher.getInstance("PBEWithHmacSHA256AndAES_128");
-
-			FileInputStream fis = new FileInputStream("users.txt"); //users.txt
-			// Ficheiro Vazio !-
-			byte[] readSalt = new byte[16];
-			fis.read(readSalt);
-			int lenght = fis.read();
-			System.out.println("lenght in decrypt: " + lenght);
-			byte[] params2 = new byte[lenght];
-			fis.read(params2);
-			byte[] encryptedBytes = fis.readAllBytes();
-			fis.close();
-
-			PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), readSalt, 20); // pass, salt, iterations
-			SecretKeyFactory kf = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES_128");
-			SecretKey key = kf.generateSecret(keySpec);
-
-			AlgorithmParameters p = AlgorithmParameters.getInstance("PBEWithHmacSHA256AndAES_128");
-			p.init(params2);
-			c.init(Cipher.DECRYPT_MODE, key, p);
-			byte[] decryptedBytes = c.doFinal(encryptedBytes);
-
-
-
-
-	        String fileContent = new String(decryptedBytes);
-
-	        String certpth = "";
-	        // Split the string into lines and iterate over the lines
-	        String[] lines = fileContent.split("\n");
-	        for (String line : lines) {
-	        	String[] split = line.split(":");
-				if(split[0].equals(user)) {
-					System.out.println("test");
-					certpth = split[1];
-					break;
-				}
-	        }
-
-	        encryptU(decryptedBytes);
-         */
 
     }
 
