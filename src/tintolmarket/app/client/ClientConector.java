@@ -75,7 +75,7 @@ public class ClientConector {
 	public Boolean connect() {//will receive values
 		System.setProperty("javax.net.ssl.trustStore"
 				,
-				"truststore");
+				"truststore2.client");
 		System.setProperty("javax.net.ssl.trustStorePassword"
 				, "keypass");
 		try {
