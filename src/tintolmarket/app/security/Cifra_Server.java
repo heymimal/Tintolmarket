@@ -1,4 +1,4 @@
-package tintolmarket.app.server;
+package tintolmarket.app.security;
 
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
@@ -7,6 +7,8 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Cifra_Server {
 
@@ -14,18 +16,6 @@ public class Cifra_Server {
 
     public Cifra_Server(String password){
         this.password = password;
-    }
-
-    public double generateNonce(){
-        SecureRandom sr = new SecureRandom();
-        return sr.nextDouble();
-    }
-
-    private byte[] generateSalt(){
-        byte[] salt = new byte[16];
-        SecureRandom sr = new SecureRandom();
-        sr.nextBytes(salt);
-        return salt;
     }
 
     public boolean[] serverAutenticate(ObjectOutputStream outStream, ObjectInputStream inStream, String user) throws NoSuchPaddingException, NoSuchAlgorithmException {
@@ -92,41 +82,9 @@ public class Cifra_Server {
         }
     }
 
+
     public String decryptUsers(String user, String newLineToAdd){
-        try {
-            Cipher c = Cipher.getInstance("PBEWithHmacSHA256AndAES_128");
-
-
-            // get from file
-
-            FileInputStream fis = new FileInputStream("users.txt"); //users.txt
-
-
-            byte[] salt = new byte[16];
-            fis.read(salt);
-            int length = fis.read();
-            System.out.println("lenght in decrypt: " + length);
-            byte[] params = new byte[length];
-            fis.read(params);
-            //int size = fis.read();
-            byte[] encryptedBytes = fis.readAllBytes(); // might change due to java 8
-            fis.close();
-
-            //
-
-            PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, 20); // pass, salt, iterations
-            SecretKeyFactory kf = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES_128");
-            SecretKey key = kf.generateSecret(keySpec);
-
-            AlgorithmParameters p = AlgorithmParameters.getInstance("PBEWithHmacSHA256AndAES_128");
-            p.init(params);
-            c.init(Cipher.DECRYPT_MODE, key, p);
-            byte[] decryptedBytes = c.doFinal(encryptedBytes);
-
-
-
-
-            String fileContent = new String(decryptedBytes);
+            String fileContent = decryptUsersAux();
             String certpth = "";
             if(newLineToAdd!=null){
                 fileContent += newLineToAdd;
@@ -144,15 +102,7 @@ public class Cifra_Server {
             }
             encryptUsers(fileContent.getBytes());
             return certpth;
-
-
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IOException | IllegalBlockSizeException |
-                 InvalidKeySpecException | BadPaddingException | InvalidAlgorithmParameterException |
-                 InvalidKeyException e) {
-            throw new RuntimeException(e);
         }
-
-    }
 
     public void encryptUsers(byte[] decryptedbytes){
         try {
@@ -191,6 +141,19 @@ public class Cifra_Server {
 
     }
 
+    public List<String> getAllUsers(){
+        String allLines = decryptUsersAux();
+        List<String> allUsers = new ArrayList<>();
+        String[] splitLines = allLines.split("\n");
+        for(String line:splitLines){
+            String s = line.split(":")[0];
+            allUsers.add(line.split(":")[0]);
+            System.out.println("Info:" + s);
+        }
+        encryptUsers(allLines.getBytes());
+        return allUsers;
+    }
+
     private void writeEncryption(byte[] salt, byte[]params, byte[] encryptedBytes, boolean isEmpty) throws IOException {
         FileOutputStream fos = new FileOutputStream("users.txt");
         //fos.write(encryptedBytes.length);
@@ -206,6 +169,60 @@ public class Cifra_Server {
 
         fos.close();
     }
+
+    private String decryptUsersAux(){
+        try {
+            Cipher c = Cipher.getInstance("PBEWithHmacSHA256AndAES_128");
+
+
+            // get from file
+
+            FileInputStream fis = new FileInputStream("users.txt"); //users.txt
+
+
+            byte[] salt = new byte[16];
+            fis.read(salt);
+            int length = fis.read();
+            System.out.println("lenght in decrypt: " + length);
+            byte[] params = new byte[length];
+            fis.read(params);
+            //int size = fis.read();
+            byte[] encryptedBytes = fis.readAllBytes(); // might change due to java 8
+            fis.close();
+
+            //
+
+            PBEKeySpec keySpec = new PBEKeySpec(password.toCharArray(), salt, 20); // pass, salt, iterations
+            SecretKeyFactory kf = SecretKeyFactory.getInstance("PBEWithHmacSHA256AndAES_128");
+            SecretKey key = kf.generateSecret(keySpec);
+
+            AlgorithmParameters p = AlgorithmParameters.getInstance("PBEWithHmacSHA256AndAES_128");
+            p.init(params);
+            c.init(Cipher.DECRYPT_MODE, key, p);
+            byte[] decryptedBytes = c.doFinal(encryptedBytes);
+
+
+            String fileContent = new String(decryptedBytes);
+            return  fileContent;
+        } catch (InvalidAlgorithmParameterException | BadPaddingException | NoSuchAlgorithmException |
+                 NoSuchPaddingException | IllegalBlockSizeException | IOException | InvalidKeySpecException |
+                 InvalidKeyException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private double generateNonce(){
+        SecureRandom sr = new SecureRandom();
+        return sr.nextDouble();
+    }
+
+    private byte[] generateSalt(){
+        byte[] salt = new byte[16];
+        SecureRandom sr = new SecureRandom();
+        sr.nextBytes(salt);
+        return salt;
+    }
+
 
 
 }
