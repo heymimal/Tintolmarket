@@ -56,10 +56,10 @@ public class ServerThread extends Thread {
 			String passwd = null;
 			try {
 				user = (String)inStream.readObject();
-				passwd = (String)inStream.readObject();
 				
 				System.out.println("thread: depois de receber a password e o user");
 				if (user.length() != 0){
+					outStream.writeObject(true);
 					FileReader fr = new FileReader(Server.users);
 					BufferedReader br = new BufferedReader(fr);
 					String check;
