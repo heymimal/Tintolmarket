@@ -13,6 +13,11 @@ public class Tintolmarket{
 	public static ClientConector c; //Conechao
 	
 	public static void main(String[] args) {
+		System.setProperty("javax.net.ssl.trustStore"
+				,
+				"truststore.client");
+		System.setProperty("javax.net.ssl.trustStorePassword"
+				, "trustpass");
 	
 		String address;
 		String username = null;

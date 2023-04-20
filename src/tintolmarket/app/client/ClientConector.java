@@ -73,11 +73,6 @@ public class ClientConector {
 	 * @return true se conectar, false se nao conectar, null se houver algum erro/excecao
 	 */
 	public Boolean connect() {//will receive values
-		System.setProperty("javax.net.ssl.trustStore"
-				,
-				"truststore2.client");
-		System.setProperty("javax.net.ssl.trustStorePassword"
-				, "keypass");
 		try {
 			
 			//this.clientSocket = new Socket(this.address[0],Integer.parseInt(this.address[1]));
