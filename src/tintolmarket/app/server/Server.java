@@ -32,7 +32,7 @@ public class Server {
 	public static final String wallet = "wallet.txt";
 	public static final String messages = "messages.txt";
 
-	public Cifra_Server auth = new Cifra_Server("password");
+	public static Cifra_Server auth;
 	
 	public static void main(String[] args) {
 		System.setProperty("javax.net.ssl.keyStore"
@@ -55,6 +55,7 @@ public class Server {
 				passCifra = args[1];
 				keyStore = args[2];
 				passKeyStore = args[3];
+				auth = = new Cifra_Server(passCifra);
 				server.startServer(Integer.parseInt(args[0]));
 			}else{
 				System.out.println("Comando para correr servidor estah incorreto. \n" +
