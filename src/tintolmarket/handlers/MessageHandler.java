@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.List;
 
 import tintolmarket.domain.Mensagem;
-import tintolmarket.domain.MessageSaver;
 import tintolmarket.domain.catalogs.CatalogoMensagem;
 import tintolmarket.domain.catalogs.CatalogoWallet;
 import tintolmarket.domain.catalogs.CatalogoWine;
