@@ -106,7 +106,12 @@ public class ServerThread extends Thread {
 							outStream.writeObject(true);
 							String winename = (String) inStream.readObject();
 							String wineseller = (String) inStream.readObject();
+							int value = wh.getPriceWine(winename,wineseller);
+							outStream.writeObject(value);
 							int quantity = (int) inStream.readObject();
+							byte[] signature = (byte[]) inStream.readObject();
+							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user);
+							System.out.println(b);
 							int resposta = wh.buyWine(winename, wineseller, user, quantity);
 							outStream.writeObject(resposta);
 							break;
@@ -129,6 +134,9 @@ public class ServerThread extends Thread {
 							String winename = (String) inStream.readObject();
 							int value = (Integer) inStream.readObject();
 							int quantity = (Integer) inStream.readObject();
+							byte signature[] = (byte[]) inStream.readObject( );
+							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user);
+							System.out.println(b);
 							int resposta = wh.sellWine(winename, user, quantity, value);
 							outStream.writeObject(resposta);
 

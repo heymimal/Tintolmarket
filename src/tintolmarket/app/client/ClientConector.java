@@ -170,6 +170,7 @@ public class ClientConector {
 				this.out.writeObject(winename);
 				this.out.writeObject(winevalue); 
 				this.out.writeObject(winequantity);
+				this.out.writeObject(cifraCliente.transaction(winename,winevalue,winequantity,username));
 				int resposta = (Integer) this.in.readObject();
 				return resposta;
 				// devolve erro se nao existir o vinho
@@ -307,7 +308,10 @@ public class ClientConector {
 			if (b) {
 				this.out.writeObject(winename);
 				this.out.writeObject(wineseller);
+				int value = (int)this.in.readObject();
 				this.out.writeObject(winequantity);
+
+				this.out.writeObject(cifraCliente.transaction(winename,value,winequantity,username));
 				
 				int resposta = (Integer)this.in.readObject();
 				return resposta;
