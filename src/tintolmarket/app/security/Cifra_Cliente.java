@@ -1,13 +1,10 @@
-package tintolmarket.app.client;
+package tintolmarket.app.security;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 
@@ -23,6 +20,48 @@ public class Cifra_Cliente {
         this.passKeyStore = passKeyStore;
         this.username = username;
         this.truststore = truststore;
+    }
+
+    public byte[] cifraMensagemParaUtilizador(String utilizador, String mensagem){
+        try{
+            KeyStore tStore = KeyStore.getInstance("PKCS12");
+            FileInputStream tfile = new FileInputStream(truststore);
+            tStore.load(tfile, "trustpass".toCharArray());
+            java.security.cert.Certificate cert = tStore.getCertificate(utilizador);
+            Key publickey = cert.getPublicKey();
+
+            Cipher c = Cipher.getInstance("RSA");
+            c.init(Cipher.ENCRYPT_MODE,publickey);
+
+            byte[] encryptedMessage = c.doFinal(mensagem.getBytes());
+
+            return encryptedMessage;
+        } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException |
+                 NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public String decifraMensagemDoUtilizador(byte[] mensagem){
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            Key myprivatekey = kstore.getKey(username,passKeyStore.toCharArray());
+            Cipher c = Cipher.getInstance("RSA");
+            c.init(Cipher.DECRYPT_MODE,myprivatekey);
+
+            byte[] decryptedMessage = c.doFinal(mensagem);
+
+            return new String(decryptedMessage);
+        } catch (UnrecoverableKeyException | NoSuchPaddingException | CertificateException | KeyStoreException |
+                 IOException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException |
+                 BadPaddingException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
     
     public boolean autenticaCliente(ObjectInputStream in, ObjectOutputStream out){

@@ -1,4 +1,5 @@
 package tintolmarket.app.server;
+import tintolmarket.app.security.Cifra_Server;
 import tintolmarket.domain.*;
 import tintolmarket.handlers.*;
 
@@ -14,6 +15,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * Classe ServerThread
@@ -65,6 +67,7 @@ public class ServerThread extends Thread {
 					boolean found = isconnected[1];
 					if(checkAuth &&!found) {
 						this.wh.addWalletUser(user);
+						this.mh.addUser(user);
 					}
 					outStream.writeObject(checkAuth);
 					connected = checkAuth;
@@ -117,7 +120,7 @@ public class ServerThread extends Thread {
 							break;
 						}case READ:{
 							outStream.writeObject(true);
-							String mensagesLer = mh.readMessagesbyUser(user);
+							List<Mensagem> mensagesLer = mh.readMessagesbyUser(user);
 							outStream.writeObject(mensagesLer);
 							//send to user
 							break;
@@ -134,7 +137,7 @@ public class ServerThread extends Thread {
 						}case TALK:{
 							outStream.writeObject(true);
 							String to = (String) inStream.readObject();
-							String message = (String) inStream.readObject();
+							byte[] message = (byte[]) inStream.readObject();
 							boolean resposta = mh.addMensagem(user, to, message);
 							outStream.writeObject(resposta);
 							//send to user

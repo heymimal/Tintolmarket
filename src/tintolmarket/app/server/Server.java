@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
+import tintolmarket.app.security.Cifra_Server;
+import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.Wine;
 import tintolmarket.handlers.MessageHandler;
 import tintolmarket.handlers.WineHandler;
@@ -74,7 +77,7 @@ public class Server {
 		SSLServerSocket ss = null;
 
 		WineHandler wh = null;
-		MessageHandler mh = new MessageHandler(users,messages);
+		MessageHandler mh = null;
 		System.out.println(PORT);
         
 		try {
@@ -87,6 +90,32 @@ public class Server {
 			File walletFile = new File(wallet);
 			Object wineCat = null;
 			Object walletCat = null;
+			Object mensagemCat = null;
+			List<String> allUsers = new ArrayList<>();
+
+			if(messagesFile.createNewFile()) {
+				System.out.println("Messages file created");
+			}else {
+				FileInputStream file = new FileInputStream(messagesFile);
+				if(file.available() > 0) {
+					ObjectInputStream in = new ObjectInputStream(file);
+					mensagemCat = (ArrayList<Mensagem>)in.readObject();
+					in.close();
+				}
+				file.close();
+			}
+
+			if(usersFile.createNewFile()) {
+				auth.encryptUsers(null);
+				System.out.println("users file created");
+			} else {
+				allUsers = auth.getAllUsers();
+			}
+
+			if(messagesFile.createNewFile()) {
+				System.out.println("Messages file created");
+			}
+			mh = new MessageHandler(mensagemCat,allUsers,messages);
 			if(winesFile.createNewFile()) {
 				System.out.println("winefile created");
 				if(walletFile.createNewFile()) {
@@ -123,14 +152,7 @@ public class Server {
 	            	wh = new WineHandler(Server.wines,Server.wallet, wineCat,walletCat);
 	            }
 			}
-			
-			if(usersFile.createNewFile()) {
-				auth.encryptUsers(null);
-				System.out.println("users file created");
-			}
-			if(messagesFile.createNewFile()) {
-				System.out.println("Messages file created");
-			}
+
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);

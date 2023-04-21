@@ -1,12 +1,13 @@
 package tintolmarket.handlers;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.List;
 
+import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.MessageSaver;
+import tintolmarket.domain.catalogs.CatalogoMensagem;
+import tintolmarket.domain.catalogs.CatalogoWallet;
+import tintolmarket.domain.catalogs.CatalogoWine;
 
 /**
  * Handler das Mensagens
@@ -16,23 +17,18 @@ import tintolmarket.domain.MessageSaver;
  */
 public class MessageHandler {
 	
-	private String usersPath;
+	private CatalogoMensagem catMensagem;
+
+	private List<String> allUsers;
+
 	private String messagesPath;
-	private MessageSaver mst;
-	
-	/**
-	 * Construtor do Handler
-	 * 
-	 * @param usersPath		path do ficheiro dos users
-	 * @param messagesPath	path do ficheiro das mensagens
-	 */
-	public MessageHandler(String usersPath, String messagesPath) {
-		this.setUsersPath(usersPath);
-		this.setMessagesPath(messagesPath);
-		this.mst = new MessageSaver();
+
+	public MessageHandler(Object o,List<String> users, String mensagemPath) {
+		this.catMensagem= CatalogoMensagem.getInstance(o);
+		this.allUsers = users;
+		this.messagesPath = mensagemPath;
 	}
-	
-	
+
 	/**
 	 * Adicionar uma mensagem
 	 * 
@@ -41,38 +37,19 @@ public class MessageHandler {
 	 * @param mensagem	a mensagem
 	 * @return true se o user destinatario foi encontrado/existe e a mensagem foi guardado, false caso contrario
 	 */
-	public boolean addMensagem(String from, String to, String mensagem) {
-		FileReader fr;
-		try {
-			fr = new FileReader(this.usersPath);
-			BufferedReader br = new BufferedReader(fr);
-			String check;
-			boolean found = false;
-			while((check = br.readLine())!= null) {
-				String[] splt = check.split(":");
-				if(splt[0].equals(to)) {
-					FileWriter fw = new FileWriter(this.messagesPath, true);
-					BufferedWriter bw = new BufferedWriter(fw);
-					synchronized (mst) {
-						mst.addMensagem(from, to, mensagem, bw);
-					}
-					
-					bw.close();
-					fw.close();
-					found = true;
-					break;
-				}
-			}
-			br.close();
-			fr.close();
-			return found;
-			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+	public boolean addMensagem(String from, String to, byte[] mensagem) {
+
+		boolean toExists = this.allUsers.contains(from);
+		if(toExists){
+			// Check file (?) -> verificar integridada
+			synchronized (catMensagem){
+				catMensagem.addMensagem(from,to,mensagem);
+			}//Atualizar ficheiro que guarda o catalogo
 		}
-		return false;
-		
+		updateMensagemFile(this.messagesPath);
+
+
+		return toExists;
 	}
 	
 	/**
@@ -81,48 +58,39 @@ public class MessageHandler {
 	 * @param user	o utilizador
 	 * @return	as mensagens, null caso ocorra algum erro
 	 */
-	public String readMessagesbyUser(String user) {
-		FileReader fr;
+	public List<Mensagem> readMessagesbyUser(String user) {
+
+		// Verificar Integridade
+		List<Mensagem> lm;
+		synchronized (catMensagem){
+			lm =  catMensagem.getMensagensToUser(user);
+		}
+		//Atualizar Info do catalogo
+		updateMensagemFile(this.messagesPath);
+		return lm;
+
+	}
+
+	private boolean updateMensagemFile(String mensagempath) {
+		FileOutputStream fileOut;
 		try {
-			fr = new FileReader(this.messagesPath);
-			BufferedReader br = new BufferedReader(fr);
-			synchronized (mst) {
-				return mst.getMensagensbyUser(user, br, this.messagesPath);
-			}
-			
-			
+			fileOut = new FileOutputStream(mensagempath, false);
+			ObjectOutputStream out = new ObjectOutputStream(fileOut);
+			out.writeObject(catMensagem.getCatMensagem());
+			out.close();
+			fileOut.close();
+			return true;
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
-		
+		return false;
 	}
 	/**
 	 * @return path do ficheiro das mensagens
 	 */
-	public String getMessagesPath() {
-		return messagesPath;
-	}
-	/**
-	 * @param messagesPath	path do ficheiro das mensagens
-	 */
-	public void setMessagesPath(String messagesPath) {
-		this.messagesPath = messagesPath;
-	}
-	
-	/**
-	 * @return path do ficheiro dos users
-	 */
-	public String getUsersPath() {
-		return usersPath;
-	}
-	
-	/**
-	 * @param usersPath		path do ficheiro dos users
-	 */
-	public void setUsersPath(String usersPath) {
-		this.usersPath = usersPath;
-	}
 
-
+	public void addUser(String user) {
+		this.allUsers.add(user);
+	}
 }
