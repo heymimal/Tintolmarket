@@ -95,4 +95,50 @@ public class Cifra_Cliente {
         }
 
     }
+
+    public byte[] transaction(String winename, int winevalue, int winequantity, String username){
+        try{
+
+            PrivateKey myprivateKey = getPrivateKey();
+            Signature s = Signature.getInstance("MD5withRSA");
+            s.initSign(myprivateKey);
+            s.update(winename.getBytes());
+            s.update((byte) winevalue);
+            s.update((byte) winequantity);
+            s.update(username.getBytes());
+            return s.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public byte[] buyTransaction(String winename, int winevalue, int winequantity, String username){
+        try{
+
+            PrivateKey myprivateKey = getPrivateKey();
+            Signature s = Signature.getInstance("MD5withRSA");
+            s.initSign(myprivateKey);
+            s.update(winename.getBytes());
+            s.update((byte) winevalue);
+            s.update((byte) winequantity);
+            s.update(username.getBytes());
+            return s.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PrivateKey getPrivateKey() {
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            Key myprivatekey = kstore.getKey(username,passKeyStore.toCharArray());
+            return (PrivateKey)myprivatekey;
+        } catch (UnrecoverableKeyException | CertificateException | IOException | NoSuchAlgorithmException |
+                 KeyStoreException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }
