@@ -4,6 +4,7 @@ import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.*;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
@@ -223,7 +224,48 @@ public class Cifra_Server {
         return salt;
     }
 
+    private Certificate getCertificate(String crttemp){
+        try{
+            FileInputStream fis = new FileInputStream(crttemp);
+            CertificateFactory cf = CertificateFactory.getInstance("X509");
+            return cf.generateCertificate(fis);
+        } catch (FileNotFoundException | CertificateException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 
 
+    public boolean verificaAssinatura(String winename, int value, int quantity, byte[] signature, String user) {
+        try{
+           String certpath = user+"serverCert.cer";
+           Certificate c = getCertificate(certpath);
+           PublicKey pk = c.getPublicKey( );
+           Signature s = Signature.getInstance("MD5withRSA");
+           s.initVerify(pk);
+           s.update(winename.getBytes());
+           s.update((byte)value);
+           s.update((byte)quantity);
+           s.update(user.getBytes());
+           return s.verify(signature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException(e);
+        }
+
+
+        /*
+        Certificate c = … //obtém um certificado de alguma forma (ex., de um ficheiro)
+PublicKey pk = c.getPublicKey( );
+Signature s = Signature.getInstance("MD5withRSA");
+s.initVerify(pk);
+s.update(data.getBytes( ));
+if (s.verify(signature))
+System.out.println("Message is valid");
+else
+System.out.println("Message was corrupted");
+fis.close();
+
+         */
+    }
 }
 
