@@ -8,8 +8,10 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 import tintolmarket.app.security.Cifra_Cliente;
+import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.Operacao;
 
 import javax.net.SocketFactory;
@@ -191,8 +193,15 @@ public class ClientConector {
 			this.out.writeObject(Operacao.READ);
 			boolean b = (boolean) this.in.readObject();
 			if(b) {
-				String s = (String)this.in.readObject();
-				return s;
+
+				List<Mensagem> lm = (List<Mensagem>) this.in.readObject();
+				StringBuilder sb = new StringBuilder();
+
+				for(Mensagem m:lm){
+					sb.append(m.getFrom()+":"+cifraCliente.decifraMensagemDoUtilizador(m.getMessage())+"\n");
+				}
+
+				return "Mensagens:\n" + sb.toString();
 			}
 			
 		} catch (IOException | ClassNotFoundException e) {
@@ -218,7 +227,8 @@ public class ClientConector {
 			boolean b = (boolean) this.in.readObject();
 			if(b) {
 				this.out.writeObject(username2);
-				this.out.writeObject(message);
+				byte[] encMessage = cifraCliente.cifraMensagemParaUtilizador(username2,message);
+				this.out.writeObject(encMessage);
 				
 				boolean b2 = (boolean)this.in.readObject();
 				return b2;
