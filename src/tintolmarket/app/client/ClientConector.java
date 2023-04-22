@@ -13,6 +13,7 @@ import java.util.List;
 import tintolmarket.app.security.Cifra_Cliente;
 import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.Operacao;
+import tintolmarket.domain.Tipo;
 
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
@@ -170,7 +171,9 @@ public class ClientConector {
 				this.out.writeObject(winename);
 				this.out.writeObject(winevalue); 
 				this.out.writeObject(winequantity);
-				this.out.writeObject(cifraCliente.transaction(winename,winevalue,winequantity,username));
+				Tipo t = Tipo.SELL;
+				this.out.writeObject(t);
+				this.out.writeObject(cifraCliente.transaction(winename,winevalue,winequantity,username,t));
 				int resposta = (Integer) this.in.readObject();
 				return resposta;
 				// devolve erro se nao existir o vinho
@@ -310,8 +313,9 @@ public class ClientConector {
 				this.out.writeObject(wineseller);
 				int value = (int)this.in.readObject();
 				this.out.writeObject(winequantity);
-
-				this.out.writeObject(cifraCliente.transaction(winename,value,winequantity,username));
+				Tipo t = Tipo.BUY;
+				this.out.writeObject(t);
+				this.out.writeObject(cifraCliente.transaction(winename,value,winequantity,username, t));
 				
 				int resposta = (Integer)this.in.readObject();
 				return resposta;

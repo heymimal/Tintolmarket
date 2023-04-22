@@ -109,10 +109,14 @@ public class ServerThread extends Thread {
 							int value = wh.getPriceWine(winename,wineseller);
 							outStream.writeObject(value);
 							int quantity = (int) inStream.readObject();
+							Tipo t = (Tipo) inStream.readObject();
 							byte[] signature = (byte[]) inStream.readObject();
-							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user);
+							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user,t);
 							System.out.println(b);
 							int resposta = wh.buyWine(winename, wineseller, user, quantity);
+							if(resposta == 1){
+								// criar objeto transacao e operacoes respetivas da blockchain
+							}
 							outStream.writeObject(resposta);
 							break;
 						}case CLASSIFY:{
@@ -134,11 +138,18 @@ public class ServerThread extends Thread {
 							String winename = (String) inStream.readObject();
 							int value = (Integer) inStream.readObject();
 							int quantity = (Integer) inStream.readObject();
+							Tipo t = (Tipo) inStream.readObject();
 							byte signature[] = (byte[]) inStream.readObject( );
-							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user);
-							System.out.println(b);
-							int resposta = wh.sellWine(winename, user, quantity, value);
-							outStream.writeObject(resposta);
+							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user,t);
+							if(b){
+								int resposta = wh.sellWine(winename, user, quantity, value);
+								if(resposta==1){
+									// criar objeto transacao e operacoes respetivas da blockchain
+								}
+								outStream.writeObject(resposta);
+							} else {
+								outStream.writeObject(-5);
+							}
 
 							//send to user
 							break;

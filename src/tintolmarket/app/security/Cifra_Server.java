@@ -1,5 +1,7 @@
 package tintolmarket.app.security;
 
+import tintolmarket.domain.Tipo;
+
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.*;
@@ -236,7 +238,7 @@ public class Cifra_Server {
     }
 
 
-    public boolean verificaAssinatura(String winename, int value, int quantity, byte[] signature, String user) {
+    public boolean verificaAssinatura(String winename, int value, int quantity, byte[] signature, String user, Tipo t) {
         try{
            String certpath = user+"serverCert.cer";
            Certificate c = getCertificate(certpath);
@@ -247,6 +249,7 @@ public class Cifra_Server {
            s.update((byte)value);
            s.update((byte)quantity);
            s.update(user.getBytes());
+           s.update(t.toString().getBytes());
            return s.verify(signature);
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException(e);
