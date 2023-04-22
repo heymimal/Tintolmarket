@@ -1,31 +1,31 @@
-package tintolmarket.app;
+package tintolmarket.app.testesBlockChain;
 
 import java.util.List;
-import java.util.ArrayList;
 
 public class BlockTintol {
-    private int index;
-    private long timestamp;
+    private int blk_id;
     private List<Transaction> transactions;
     private String previousHash;
     private String hash;
+    private byte[] signature;
+    private int n_trx;
 
     // constructor
-    public BlockTintol(int index, long timestamp, List<Transaction> transactions, String previousHash, String hash) {
-        this.index = index;
-        this.timestamp = timestamp;
+    public BlockTintol(int blk_id, byte[] signature, List<Transaction> transactions, String previousHash) {
+        this.blk_id = blk_id;
+        this.signature = signature;
         this.transactions = transactions;
         this.previousHash = previousHash;
-        this.hash = hash;
+        n_trx = transactions.size();
     }
 
     // getters
     public int getIndex() {
-        return index;
+        return blk_id;
     }
 
-    public long getTimestamp() {
-        return timestamp;
+    public byte[] getSignature() {
+        return signature;
     }
 
     public List<Transaction> getTransactions() {
@@ -42,5 +42,14 @@ public class BlockTintol {
 
     public void setHash(String hash) {
         this.hash = hash;
+    }
+
+    public void addTransaction(Transaction t){
+        this.transactions.add(t);
+        n_trx++;
+    }
+
+    public int getN_trx() {
+        return n_trx;
     }
 }
