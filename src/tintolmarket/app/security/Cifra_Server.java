@@ -1,5 +1,7 @@
 package tintolmarket.app.security;
 
+import tintolmarket.app.testesBlockChain.BlockTintol;
+import tintolmarket.app.testesBlockChain.Transaction;
 import tintolmarket.domain.Tipo;
 
 import javax.crypto.*;
@@ -17,8 +19,13 @@ public class Cifra_Server {
 
     private String password;
 
-    public Cifra_Server(String password){
+    private String keystore;
+    private String passKeyStore;
+
+    public Cifra_Server(String password, String keystore, String passKeyStore){
         this.password = password;
+        this.keystore = keystore;
+        this.passKeyStore = passKeyStore;
     }
 
     public boolean[] serverAutenticate(ObjectOutputStream outStream, ObjectInputStream inStream, String user) throws NoSuchPaddingException, NoSuchAlgorithmException {
@@ -255,20 +262,41 @@ public class Cifra_Server {
             throw new RuntimeException(e);
         }
 
+    }
 
-        /*
-        Certificate c = … //obtém um certificado de alguma forma (ex., de um ficheiro)
-PublicKey pk = c.getPublicKey( );
-Signature s = Signature.getInstance("MD5withRSA");
-s.initVerify(pk);
-s.update(data.getBytes( ));
-if (s.verify(signature))
-System.out.println("Message is valid");
-else
-System.out.println("Message was corrupted");
-fis.close();
+    public byte[] getServerSignature(BlockTintol bloco) {
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            Key myprivatekey = kstore.getKey("myServer",passKeyStore.toCharArray());
+            Signature s = Signature.getInstance("MD5withRSA");
+            s.initSign((PrivateKey) myprivatekey);
 
-         */
+            s.update(bloco.getPreviousHash().getBytes());
+            s.update((byte) bloco.getIndex());
+            s.update((byte) bloco.getN_trx());
+            for(Transaction t : bloco.getTransactions()){
+                s.update(t.getNome_vinho().getBytes());
+                s.update((byte) t.getnEntidades());
+                s.update((byte)t.getValor());
+                s.update(t.getUser().getBytes());
+                s.update(t.getTipo().toString().getBytes());
+                s.update(t.getSignature());
+            }
+
+            return s.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException e) {
+            throw new RuntimeException(e);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (CertificateException e) {
+            throw new RuntimeException(e);
+        } catch (KeyStoreException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

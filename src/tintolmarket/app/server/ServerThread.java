@@ -1,5 +1,7 @@
 package tintolmarket.app.server;
 import tintolmarket.app.security.Cifra_Server;
+import tintolmarket.app.testesBlockChain.BlockTintol;
+import tintolmarket.app.testesBlockChain.Transaction;
 import tintolmarket.domain.*;
 import tintolmarket.handlers.*;
 
@@ -52,6 +54,12 @@ public class ServerThread extends Thread {
 	@Override
 	public void run(){
 		boolean connected = false;
+		BlockchainHandler bch = new BlockchainHandler(auth);
+		try {
+			bch.createBlock(1,"hash_nova");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		try {
 			ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 			ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
@@ -142,6 +150,9 @@ public class ServerThread extends Thread {
 							byte signature[] = (byte[]) inStream.readObject( );
 							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user,t);
 							if(b){
+								Transaction tr = new Transaction(winename, quantity, value, user, t);
+								tr.setSignature(signature);
+								bch.addTransaction(tr);
 								int resposta = wh.sellWine(winename, user, quantity, value);
 								if(resposta==1){
 									// criar objeto transacao e operacoes respetivas da blockchain

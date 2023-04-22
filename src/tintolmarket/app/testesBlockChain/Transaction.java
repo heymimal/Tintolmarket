@@ -2,7 +2,9 @@ package tintolmarket.app.testesBlockChain;
 
 import tintolmarket.domain.Tipo;
 
-public class Transaction {
+import java.io.Serializable;
+
+public class Transaction implements Serializable {
     private String nome_vinho;
 
     private int nEntidades;
@@ -45,6 +47,10 @@ public class Transaction {
         this.valor = valor;
         this.user = user;
         this.tipo = tipo;
+    }
+
+    public void setSignature(byte[] signature) {
+        this.signature = signature;
     }
 }
 
