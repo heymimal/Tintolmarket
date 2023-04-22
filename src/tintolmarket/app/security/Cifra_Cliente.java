@@ -1,5 +1,8 @@
 package tintolmarket.app.security;
 
+import tintolmarket.domain.Tipo;
+import tintolmarket.domain.Transacao;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -96,7 +99,7 @@ public class Cifra_Cliente {
 
     }
 
-    public byte[] transaction(String winename, int winevalue, int winequantity, String username){
+    public byte[] transaction(String winename, int winevalue, int winequantity, String username, Tipo tipo){
         try{
 
             PrivateKey myprivateKey = getPrivateKey();
@@ -106,6 +109,7 @@ public class Cifra_Cliente {
             s.update((byte) winevalue);
             s.update((byte) winequantity);
             s.update(username.getBytes());
+            s.update(tipo.toString().getBytes());
             return s.sign();
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException(e);
