@@ -1,12 +1,14 @@
 package tintolmarket.handlers;
 
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.catalogs.CatalogoMensagem;
-import tintolmarket.domain.catalogs.CatalogoWallet;
-import tintolmarket.domain.catalogs.CatalogoWine;
+/*import tintolmarket.domain.catalogs.CatalogoWallet;
+import tintolmarket.domain.catalogs.CatalogoWine;*/
 
 /**
  * Handler das Mensagens
@@ -17,15 +19,18 @@ import tintolmarket.domain.catalogs.CatalogoWine;
 public class MessageHandler {
 	
 	private CatalogoMensagem catMensagem;
-
 	private List<String> allUsers;
-
 	private String messagesPath;
+	private MessageDigest md;
+	private byte[] msgDigest;
 
-	public MessageHandler(Object o,List<String> users, String mensagemPath) {
+
+	public MessageHandler(Object o,List<String> users, String mensagemPath) throws NoSuchAlgorithmException {
 		this.catMensagem= CatalogoMensagem.getInstance(o);
 		this.allUsers = users;
 		this.messagesPath = mensagemPath;
+		this.md = MessageDigest.getInstance("SHA");
+		this.msgDigest = null;
 	}
 
 	/**
@@ -35,9 +40,14 @@ public class MessageHandler {
 	 * @param to	recetor da mensagem
 	 * @param mensagem	a mensagem
 	 * @return true se o user destinatario foi encontrado/existe e a mensagem foi guardado, false caso contrario
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
-	public boolean addMensagem(String from, String to, byte[] mensagem) {
-
+	public boolean addMensagem(String from, String to, byte[] mensagem) throws ClassNotFoundException, IOException {
+		if(!msgIntegrity(this.messagesPath)) {
+			System.out.println("Erro ao adicionar mensagem: ficheiro corrompido");
+			return false;
+		}
 		boolean toExists = this.allUsers.contains(from);
 		if(toExists){
 			// Check file (?) -> verificar integridada
@@ -56,10 +66,14 @@ public class MessageHandler {
 	 * 
 	 * @param user	o utilizador
 	 * @return	as mensagens, null caso ocorra algum erro
+	 * @throws IOException
+	 * @throws ClassNotFoundException
 	 */
-	public List<Mensagem> readMessagesbyUser(String user) {
-
-		// Verificar Integridade
+	public List<Mensagem> readMessagesbyUser(String user) throws ClassNotFoundException, IOException {
+		if(!msgIntegrity(this.messagesPath)) {
+			System.out.println("Erro ao ler as mensagens: ficheiro corrompido");
+			return null;
+		}
 		List<Mensagem> lm;
 		synchronized (catMensagem){
 			lm =  catMensagem.getMensagensToUser(user);
@@ -70,7 +84,7 @@ public class MessageHandler {
 
 	}
 
-	private boolean updateMensagemFile(String mensagempath) {
+	private boolean updateMensagemFile(String mensagempath) throws ClassNotFoundException {
 		FileOutputStream fileOut;
 		try {
 			fileOut = new FileOutputStream(mensagempath, false);
@@ -78,6 +92,7 @@ public class MessageHandler {
 			out.writeObject(catMensagem.getCatMensagem());
 			out.close();
 			fileOut.close();
+			this.msgDigest = this.md.digest(readFile(mensagempath).getBytes());
 			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -91,5 +106,29 @@ public class MessageHandler {
 
 	public void addUser(String user) {
 		this.allUsers.add(user);
+	}
+
+	private String readFile(String filepath) throws IOException, ClassNotFoundException {
+		FileInputStream fis = new FileInputStream(filepath);
+		ObjectInputStream ois = new ObjectInputStream(fis);
+		Object o = ois.readObject();
+		if (!(o instanceof String)) {
+			System.out.println("error");
+			System.exit(-1);
+		}
+		String data = (String) o;
+		fis.close();
+		ois.close();
+		return data;
+	}
+
+	private boolean msgIntegrity(String msgpath) throws IOException, ClassNotFoundException {
+		String data = readFile(msgpath);
+		if(this.msgDigest.equals(null)) {
+			this.msgDigest = md.digest(data.getBytes());
+			return true;
+		} else {
+			return MessageDigest.isEqual(md.digest(data.getBytes()), this.msgDigest);
+		}
 	}
 }
