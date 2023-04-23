@@ -10,7 +10,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-import tintolmarket.app.security.Cifra_Cliente;
+import tintolmarket.app.security.ClientSecurity;
 import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.Operacao;
 import tintolmarket.domain.Tipo;
@@ -26,16 +26,12 @@ import javax.net.ssl.SSLSocketFactory;
  */
 public class ClientConector {
 	private final String PORT_DEFAULT = "12345";
-	private String username;
-	private String truststore;
-	private String keystore;
-	private String passKeyStore;
+	private String username; // also used as alias for kstore
 	private String[] address;
 	private ObjectOutputStream out;
 	private ObjectInputStream in;
 	private SSLSocket clientSocket;
-
-	private Cifra_Cliente cifraCliente;
+	private ClientSecurity clientSecurity;
 
 	/**
 	 * Construtor do Client_stub
@@ -47,15 +43,10 @@ public class ClientConector {
 	 * @param username
 	 */
 	public ClientConector(String address, String truststore, String keystore, String passKeyStore, String username) {
-		//criar estruturas para conexão com servidor
-		//enviar username e pass para servidor
-		this.address = setAddress(address);
-		setTrustStore(truststore);
-		setKeyStore(keystore);
-		setPassKeyStore(passKeyStore);
-		setUsername(username);
-		this.cifraCliente = new Cifra_Cliente(keystore,passKeyStore,username,truststore);
 
+		this.address = setAddress(address);
+		setUsername(username);
+		this.clientSecurity = new ClientSecurity(keystore,passKeyStore,username,truststore);
 
 		clientSocket = null;
 		
@@ -70,7 +61,7 @@ public class ClientConector {
 			if(addSplit.length == 2) {
 				if(addSplit[1].length() == 5) {
 					returnv[1] = addSplit[1];
-;				}
+				}
 			} else {
 				returnv[1] = this.PORT_DEFAULT;
 			}
@@ -82,11 +73,11 @@ public class ClientConector {
 	 * Conexao do Cliente
 	 * @return true se conectar, false se nao conectar, null se houver algum erro/excecao
 	 */
-	public Boolean connect() {//will receive values
+	public Boolean connect() {
 		SocketFactory sf = SSLSocketFactory.getDefault();
 		try {
 			
-			//this.clientSocket = new Socket(this.address[0],Integer.parseInt(this.address[1]));
+
 			this.clientSocket = (SSLSocket) sf.createSocket(this.address[0],Integer.parseInt(this.address[1]));
 			this.out = new ObjectOutputStream(clientSocket.getOutputStream());
 			this.in = new ObjectInputStream(clientSocket.getInputStream());
@@ -95,7 +86,7 @@ public class ClientConector {
 			
 			Boolean b = (Boolean) this.in.readObject();
 			if(b){
-				return cifraCliente.autenticaCliente(in,out);
+				return clientSecurity.autenticaCliente(in,out);
 			}
 
 		}catch (IOException | ClassNotFoundException e) {
@@ -134,8 +125,7 @@ public class ClientConector {
 				            this.out.flush();
 				        }
 				        inF.close();
-				        boolean resposta2 = (boolean) this.in.readObject();
-				        return resposta2;
+				        return (boolean) this.in.readObject();
 					}
 					return resposta;
 					
@@ -173,9 +163,12 @@ public class ClientConector {
 				this.out.writeObject(winequantity);
 				Tipo t = Tipo.SELL;
 				this.out.writeObject(t);
-				this.out.writeObject(cifraCliente.transaction(winename,winevalue,winequantity,username,t));
-				int resposta = (Integer) this.in.readObject();
-				return resposta;
+
+				// Realizacao da assinatura cliente
+				this.out.writeObject(clientSecurity.transaction(winename,winevalue,winequantity,username,t));
+
+
+				return (Integer) this.in.readObject();
 				// devolve erro se nao existir o vinho
 			} else {
 				System.out.println("Erro no servidor.");
@@ -190,7 +183,7 @@ public class ClientConector {
 	/**
 	 * Funcao para comunicar com o servidor acerca da operacao de ler as mensagens recebidas.
 	 * 
-	 * @return da mensagem recebida s, null em caso de erro.
+	 * @return das mensagens recebida s, null em caso de erro.
 	 */
 	public String read() {
 		try {
@@ -202,10 +195,13 @@ public class ClientConector {
 				StringBuilder sb = new StringBuilder();
 
 				for(Mensagem m:lm){
-					sb.append(m.getFrom()+":"+cifraCliente.decifraMensagemDoUtilizador(m.getMessage())+"\n");
+					sb.append(m.getFrom());
+					sb.append(":");
+					sb.append(clientSecurity.decifraMensagemDoUtilizador(m.getMessage()));
+					sb.append("\n");
 				}
 
-				return "Mensagens:\n" + sb.toString();
+				return "Mensagens:\n" + sb;
 			}
 			
 		} catch (IOException | ClassNotFoundException e) {
@@ -219,23 +215,22 @@ public class ClientConector {
 	/**
 	 * Funcao para comunicar com o servidor acerca da operacao de enviar mensagem para o utilizador.
 	 * 
-	 * @param username2		utilizador para o qual se vai enviar a mensagem
+	 * @param userTarget		utilizador para o qual se vai enviar a mensagem
 	 * @param message		a mensagem enviada
 	 * 
 	 * @return true se a mensagem for bem enviada, false caso contrario
 	 */
-	public boolean talk(String username2, String message) {
+	public boolean talk(String userTarget, String message) {
 		// MANDAR MENSAGENS
 		try {
 			this.out.writeObject(Operacao.TALK);
 			boolean b = (boolean) this.in.readObject();
 			if(b) {
-				this.out.writeObject(username2);
-				byte[] encMessage = cifraCliente.cifraMensagemParaUtilizador(username2,message);
+				this.out.writeObject(userTarget);
+				byte[] encMessage = clientSecurity.cifraMensagemParaUtilizador(userTarget,message);
 				this.out.writeObject(encMessage);
 				
-				boolean b2 = (boolean)this.in.readObject();
-				return b2;
+				return  (boolean)this.in.readObject();
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -259,8 +254,8 @@ public class ClientConector {
 			if (b) {
 				this.out.writeObject(winename);
 				this.out.writeObject(stars); 
-				boolean resposta = (boolean) this.in.readObject();
-				return resposta;
+				return (boolean) this.in.readObject();
+
 				
 				// devolve erro se não existir
 			} else {
@@ -283,8 +278,7 @@ public class ClientConector {
 			this.out.writeObject(Operacao.WALLET);
 			boolean b = (boolean) this.in.readObject();
 			if(b) {
-				int i = (Integer)this.in.readObject();
-				return i;
+				return (Integer)this.in.readObject();
 			}
 		} catch (IOException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -315,11 +309,10 @@ public class ClientConector {
 				this.out.writeObject(winequantity);
 				Tipo t = Tipo.BUY;
 				this.out.writeObject(t);
-				this.out.writeObject(cifraCliente.transaction(winename,value,winequantity,username, t));
+				this.out.writeObject(clientSecurity.transaction(winename,value,winequantity,username, t));
 				
-				int resposta = (Integer)this.in.readObject();
-				return resposta;
-				
+				return (Integer)this.in.readObject();
+
 				// devolve erro se vinho não existir, se wallet atual < valor, quantidade tem de existir
 			} else {
 				System.out.println("Erro no servidor.");
@@ -374,9 +367,7 @@ public class ClientConector {
 			this.out.writeObject(Operacao.LIST);
 			boolean b = (boolean) this.in.readObject();
 			if (b) {
-
-				String resposta = (String) this.in.readObject();
-				return resposta;
+				return (String) this.in.readObject();
 
 				// devolve erro se não existir
 			} else {
@@ -394,19 +385,6 @@ public class ClientConector {
 	private void setUsername(String username) {
 		this.username = username;
 	}
-
-	private void setPassKeyStore(String passKeyStore) {
-		this.passKeyStore = passKeyStore;
-	}
-
-	private void setKeyStore(String keystore) {
-		this.keystore = keystore;
-	}
-
-	private void setTrustStore(String truststore) {
-		this.truststore = truststore;
-	}
-
 
 
 }

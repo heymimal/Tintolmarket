@@ -8,16 +8,17 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
-public class Cifra_Cliente {
+public class ClientSecurity {
 
     private final String keystore;
     private final String passKeyStore;
     private final String username;
     private final String truststore;
 
-    public Cifra_Cliente(String keystore, String passKeyStore, String username, String truststore){
+    public ClientSecurity(String keystore, String passKeyStore, String username, String truststore){
         this.keystore = keystore;
         this.passKeyStore = passKeyStore;
         this.username = username;
@@ -26,19 +27,14 @@ public class Cifra_Cliente {
 
     public byte[] cifraMensagemParaUtilizador(String utilizador, String mensagem){
         try{
-            KeyStore tStore = KeyStore.getInstance("PKCS12");
-            FileInputStream tfile = new FileInputStream(truststore);
-            tStore.load(tfile, "trustpass".toCharArray());
-            java.security.cert.Certificate cert = tStore.getCertificate(utilizador);
-            Key publickey = cert.getPublicKey();
+            // Chave publica do utilizador para quem a mensagem vai ser enviada
+            Key publickey = getCertificate(utilizador).getPublicKey();
 
             Cipher c = Cipher.getInstance("RSA");
             c.init(Cipher.ENCRYPT_MODE,publickey);
 
-            byte[] encryptedMessage = c.doFinal(mensagem.getBytes());
-
-            return encryptedMessage;
-        } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException |
+            return c.doFinal(mensagem.getBytes());
+        } catch (NoSuchAlgorithmException |
                  NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
             throw new RuntimeException(e);
         }
@@ -47,51 +43,43 @@ public class Cifra_Cliente {
 
     public String decifraMensagemDoUtilizador(byte[] mensagem){
         try{
-            FileInputStream kfile = new FileInputStream(keystore);  //keystore
-            KeyStore kstore = KeyStore.getInstance("PKCS12");
-            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
-            Key myprivatekey = kstore.getKey(username,passKeyStore.toCharArray());
+            Key myprivatekey = getPrivateKey();
             Cipher c = Cipher.getInstance("RSA");
             c.init(Cipher.DECRYPT_MODE,myprivatekey);
 
             byte[] decryptedMessage = c.doFinal(mensagem);
 
             return new String(decryptedMessage);
-        } catch (UnrecoverableKeyException | NoSuchPaddingException | CertificateException | KeyStoreException |
-                 IOException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException |
+        } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException | IllegalBlockSizeException |
                  BadPaddingException e) {
             throw new RuntimeException(e);
         }
-
 
     }
     
     public boolean autenticaCliente(ObjectInputStream in, ObjectOutputStream out){
         try {
             Double nonce = (Double) in.readObject();
-            Boolean x = (Boolean) in.readObject();
-            System.out.println(x);
-            FileInputStream kfile = new FileInputStream(keystore);  //keystore
-            KeyStore kstore = KeyStore.getInstance("PKCS12");
-            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
-            Key myprivatekey = kstore.getKey(username,passKeyStore.toCharArray());
+            Boolean flag = (Boolean) in.readObject();
+
+            // gets privatekey from kstore
+            Key myprivatekey = getPrivateKey();
+
             Cipher c = Cipher.getInstance("RSA");
             c.init(Cipher.ENCRYPT_MODE,myprivatekey);
             byte []nonceEncoded = c.doFinal(nonce.toString().getBytes());
+
             out.writeObject(nonce);
             out.writeObject(nonceEncoded);
-            if(!x) {
-                KeyStore tStore = KeyStore.getInstance("PKCS12");
-                FileInputStream tfile = new FileInputStream(truststore);
-                tStore.load(tfile, "trustpass".toCharArray());
-                java.security.cert.Certificate cert = tStore.getCertificate(username);
-                out.writeObject(cert);
+
+            if(!flag) {
+                out.writeObject(getCertificate(username));
             }
-            Boolean isconnected = (boolean)in.readObject();
-            System.out.println(isconnected);
-            return isconnected;
-        } catch (UnrecoverableKeyException | NoSuchPaddingException | IllegalBlockSizeException | CertificateException |
-                 KeyStoreException | IOException | NoSuchAlgorithmException | BadPaddingException |
+
+            return (boolean)in.readObject();
+
+        } catch (NoSuchPaddingException | IllegalBlockSizeException |
+                 IOException | NoSuchAlgorithmException | BadPaddingException |
                  InvalidKeyException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -100,7 +88,6 @@ public class Cifra_Cliente {
 
     public byte[] transaction(String winename, int winevalue, int winequantity, String username, Tipo tipo){
         try{
-
             PrivateKey myprivateKey = getPrivateKey();
             Signature s = Signature.getInstance("MD5withRSA");
             s.initSign(myprivateKey);
@@ -109,22 +96,6 @@ public class Cifra_Cliente {
             s.update((byte) winequantity);
             s.update(username.getBytes());
             s.update(tipo.toString().getBytes());
-            return s.sign();
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public byte[] buyTransaction(String winename, int winevalue, int winequantity, String username){
-        try{
-
-            PrivateKey myprivateKey = getPrivateKey();
-            Signature s = Signature.getInstance("MD5withRSA");
-            s.initSign(myprivateKey);
-            s.update(winename.getBytes());
-            s.update((byte) winevalue);
-            s.update((byte) winequantity);
-            s.update(username.getBytes());
             return s.sign();
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException(e);
@@ -142,6 +113,16 @@ public class Cifra_Cliente {
                  KeyStoreException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private Certificate getCertificate(String nome){
+        try{
+            KeyStore tStore = KeyStore.getInstance("PKCS12");
+            FileInputStream tfile = new FileInputStream(truststore);
+            tStore.load(tfile, "trustpass".toCharArray());
+            return tStore.getCertificate(nome);
+        } catch (CertificateException | KeyStoreException | IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
