@@ -1,7 +1,7 @@
 package tintolmarket.handlers;
 
-import tintolmarket.app.testesBlockChain.BlockTintol;
-import tintolmarket.app.testesBlockChain.Transaction;
+import tintolmarket.domain.blockchain.BlockTintol;
+import tintolmarket.domain.blockchain.Transaction;
 import tintolmarket.app.security.Cifra_Server;
 
 import java.io.*;
@@ -15,69 +15,71 @@ public class BlockchainHandler {
 
     private long id;
 
-    private Cifra_Server cs;
+    private final Cifra_Server cs;
 
-    public void setId(long id) {
+    public BlockchainHandler(Cifra_Server cs)  {
+        this.cs = cs;
+        chainStartAndIntegrityCheck();
+    }
+
+    public void addTransaction(Transaction t) {
+        try {
+            BlockTintol bloco = getBlock(this.id);
+            boolean cheio = bloco.addTransaction(t);
+            byte[] hash = null;
+
+            if(cheio) {
+                // Bloco a ser fechado
+                bloco.setSignature(this.cs.getServerSignature(bloco));
+                updateBlock(bloco);
+
+                // A gerar hash
+                File blockFile = getblockFile(this.id);
+                hash = calculateHash(blockFile);
+
+                // A criar novo bloco
+                setId(bloco.getIndex()+1);
+                createBlock(this.id, hash);
+            } else {
+                updateBlock(bloco);
+            }
+        }  catch (IOException | NoSuchAlgorithmException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public synchronized String list(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Transacoes:\n");
+        for(long i = 1; i <= this.id; i++){
+            try {
+                BlockTintol b = getBlock(i);
+                sb.append(b.toString());
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return sb.toString();
+    }
+
+    private File getblockFile(long id) {
+        String path = "block_"+id +".blk";
+        return new File(blockFolder,path);
+    }
+
+    private void setId(long id) {
         this.id = id;
     }
 
-    public BlockchainHandler(Cifra_Server cs) throws IOException, ClassNotFoundException {
-        this.cs = cs;
-        if(blockFolder.mkdir()){
-            // created new directory, doesnt need to check integrity -> no blockchain created -> creates block1
-            byte[] zeros = new byte[32];
-            Arrays.fill(zeros, (byte) 0);
-            createBlock(1,Arrays.toString(zeros));
-            setId(1);
-        } else{
-            //verifies integrity and saves the latest id -> where its going to write the following transactions
-            //just saving the id for now
-            long i = 1;
-            boolean found = false;
-            while(!found){
-                String path = "block_"+i +".blk";
-                File blockFile = new File(blockFolder,path);
-                if(blockFile.exists()){
-                    BlockTintol b = getBlock(i);
-                    if(!b.isFull()){
-                        System.out.println(i + " IS NOT FULL");
-                        setId(i);
-                        found = true;
-                    } else {
-                        System.out.println(i + " IS FULL");
-                        i++;
-                    }
-                } else { // this shouldnt happen, as a block is always created even if null
-                    this.id = i;
-                    found = true;
-                }
-            }
-
-
-        }
-    }
-
-    public void addTransaction(Transaction t) throws IOException, ClassNotFoundException {
-        BlockTintol bloco = getBlock(this.id);
-        boolean cheio = bloco.addTransaction(t);
-        String hash = null;
-
-        if(cheio) {
-            System.out.println("bloco estah cheio");
-            bloco.setSignature(this.cs.getServerSignature(bloco));
-            hash = calculateHash(bloco);
-            updateBlock(bloco);
-            setId(bloco.getIndex()+1);
-            createBlock(this.id, hash);
-        } else {
-            updateBlock(bloco);
-        }
+    private void chainStartAndIntegrityCheck() {
+        long i = createBlockChain();
+        verifyIntegrity(i);
 
     }
 
-    public BlockTintol getBlock(long i) throws IOException, ClassNotFoundException {
-        String path = "block_"+i +".blk";
-        File blockFile = new File(blockFolder,path);
+    private BlockTintol getBlock(long i) throws IOException, ClassNotFoundException {
+        File blockFile = getblockFile(i);
         FileInputStream file = new FileInputStream(blockFile);
         if(file.available()>0) {
             ObjectInputStream in = new ObjectInputStream(file);
@@ -90,12 +92,11 @@ public class BlockchainHandler {
         return null;
     }
 
-    public void createBlock(long id, String hash) throws IOException {
+    private void createBlock(long id, byte[] hash) throws IOException {
         FileOutputStream fileOut;
         BlockTintol bloco = new BlockTintol(id, hash);
 
-        String path = "block_"+id +".blk";
-        File blockFile = new File(blockFolder,path);
+        File blockFile = getblockFile(id);
 
         fileOut = new FileOutputStream(blockFile, false);
         ObjectOutputStream outst = new ObjectOutputStream(fileOut);
@@ -104,11 +105,10 @@ public class BlockchainHandler {
         fileOut.close();
     }
 
-    public void updateBlock(BlockTintol b) throws IOException {
+    private void updateBlock(BlockTintol b) throws IOException {
         FileOutputStream fileOut;
 
-        String path = "block_"+b.getIndex() +".blk";
-        File blockFile = new File(blockFolder,path);
+        File blockFile = getblockFile(b.getIndex());
 
         fileOut = new FileOutputStream(blockFile, false);
         ObjectOutputStream out2 = new ObjectOutputStream(fileOut);
@@ -117,22 +117,78 @@ public class BlockchainHandler {
         fileOut.close();
     }
 
-    public static String calculateHash(BlockTintol block) {
-        String data = block.getIndex() + block.getTransactions().toString() + block.getPreviousHash();
-        MessageDigest digest = null;
+    private byte[] calculateHash(File filepath) throws IOException, NoSuchAlgorithmException {
+        FileInputStream fis = new FileInputStream(filepath);
+        byte[] data = new byte[(int) filepath.length()];
+        fis.close();
+        MessageDigest m = MessageDigest.getInstance("SHA-256");
+        return m.digest(data);
+    }
+
+    private void verifyIntegrity(long i){
+        try{
+            byte[] previous_hash = null;
+            while(i > 0){
+                // Verifying the integrity of each block
+                BlockTintol b = getBlock(i);
+                if(b.isFull()){
+                    // Verificacao
+                    File blockFile = getblockFile(i);
+                    byte[] currentHash = calculateHash(blockFile);
+                    Boolean verifyBlock = cs.verificaBlockChain(b, previous_hash, currentHash);
+                    if(verifyBlock){
+                        previous_hash = b.getPreviousHash();
+                        System.out.println("Verificacao do bloco " + i + "da blockchain realizada com sucesso!");
+                        i--;
+                    } else {
+                        System.out.println("Verificacao do bloco " + i + "da blockchain falhada! A terminar o programa!");
+                        System.exit(-5);
+                    }
+                } else {
+                    previous_hash = b.getPreviousHash();
+                    i--;
+                }
+            }
+        }catch (IOException | NoSuchAlgorithmException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+    private long createBlockChain(){
+        long i = 1;
         try {
-            digest = MessageDigest.getInstance("SHA-256");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            if(blockFolder.mkdir()){
+                // created new directory, doesnt need to check integrity -> no blockchain created -> creates block1
+                byte[] zeros = new byte[32];
+                Arrays.fill(zeros, (byte) 0);
+                createBlock(1,zeros);
+                setId(1);
+            } else{
+                //verifies integrity and saves the latest id -> where its going to write the following transactions
+                //Saving the latest id
+                boolean found = false;
+                while(!found){
+                    File blockFile = getblockFile(i);
+                    if(blockFile.exists()){
+                        BlockTintol b = getBlock(i);
+                        if(!b.isFull()){
+                            System.out.println(i + " IS NOT FULL");
+                            setId(i);
+                            found = true;
+                        } else {
+                            System.out.println(i + " IS FULL");
+                            i++;
+                        }
+                    } else { // this shouldnt happen for i=1, as a block is always created even if null
+                        this.id = i;
+                        found = true;
+                    }
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
-        byte[] hash = digest.digest(data.getBytes());
-        StringBuffer hexString = new StringBuffer();
-        for (int i = 0; i < hash.length; i++) {
-            String hex = Integer.toHexString(0xff & hash[i]);
-            if(hex.length() == 1) hexString.append('0');
-            hexString.append(hex);
-        }
-        return hexString.toString();
+        return i;
     }
 
 }
