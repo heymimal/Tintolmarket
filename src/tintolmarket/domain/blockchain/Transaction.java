@@ -1,4 +1,4 @@
-package tintolmarket.app.testesBlockChain;
+package tintolmarket.domain.blockchain;
 
 import tintolmarket.domain.Tipo;
 
@@ -51,6 +51,18 @@ public class Transaction implements Serializable {
 
     public void setSignature(byte[] signature) {
         this.signature = signature;
+    }
+
+    public String toString(){
+        if(this.tipo == Tipo.SELL){
+            return "Foram colocadas "+this.nEntidades + " unidades do vinho " + this.nome_vinho +
+                    " pelo utilizador "+ this.user +" ao preco de "+this.valor +".";
+                    //a identificação
+            //do vinho, o número de unidades criadas, o valor de cada unidade, e a identificação do seu dono
+        } else {
+            return "O utilizador " + this.user +" comprou " + this.nEntidades +" do vinho " + this.nome_vinho +
+                    ", tendo custado cada unidade "+ this.valor +".";
+        }
     }
 }
 

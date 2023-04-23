@@ -1,18 +1,18 @@
-package tintolmarket.app.testesBlockChain;
+package tintolmarket.domain.blockchain;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BlockTintol implements Serializable {
-    private String previousHash;
+    private byte[] previousHash;
     private long blk_id;
     private long n_trx;
     private List<Transaction> transactions;
     private byte[] signature;
 
     // constructor
-    public BlockTintol(long blk_id, String previousHash) {
+    public BlockTintol(long blk_id, byte[] previousHash) {
         this.blk_id = blk_id;
         this.previousHash = previousHash;
         this.transactions = new ArrayList<>();
@@ -33,7 +33,7 @@ public class BlockTintol implements Serializable {
         return transactions;
     }
 
-    public String getPreviousHash() {
+    public byte[] getPreviousHash() {
         return previousHash;
     }
 
@@ -53,5 +53,14 @@ public class BlockTintol implements Serializable {
 
     public boolean isFull() {
         return this.n_trx == 5;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder sb = new StringBuilder();
+        for (Transaction t: this.getTransactions()){
+            sb.append(t.toString()+"\n");
+        }
+        return sb.toString();
     }
 }
