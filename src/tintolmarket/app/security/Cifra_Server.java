@@ -22,10 +22,13 @@ public class Cifra_Server {
     private String keystore;
     private String passKeyStore;
 
+    private final File certificadosFolder = new File("certificados");
+
     public Cifra_Server(String password, String keystore, String passKeyStore){
         this.password = password;
         this.keystore = keystore;
         this.passKeyStore = passKeyStore;
+        certificadosFolder.mkdir();
     }
 
     public boolean[] serverAutenticate(ObjectOutputStream outStream, ObjectInputStream inStream, String user) throws NoSuchPaddingException, NoSuchAlgorithmException {
@@ -55,9 +58,7 @@ public class Cifra_Server {
                 nonce_client = (double) inStream.readObject();
                 nonce_encoded = (byte[])inStream.readObject();
 
-                FileInputStream fis = new FileInputStream(crttemp);
-                CertificateFactory cf = CertificateFactory.getInstance("X509");
-                cert = cf.generateCertificate(fis);
+                cert = getCertificate(crttemp);
             }
             boolean equalNonce = nonce==nonce_client;
             Key publickeyuser = cert.getPublicKey();
@@ -76,7 +77,7 @@ public class Cifra_Server {
             if(checkAuth && !found){
                 String filename = user+"serverCert.cer";
 
-                File file = new File(filename);
+                File file = new File(certificadosFolder,filename);
 
                 FileOutputStream fis = new FileOutputStream(file);
                 fis.write(cert.getEncoded());
@@ -235,7 +236,8 @@ public class Cifra_Server {
 
     private Certificate getCertificate(String crttemp){
         try{
-            FileInputStream fis = new FileInputStream(crttemp);
+            File file = new File(certificadosFolder,crttemp);
+            FileInputStream fis = new FileInputStream(file);
             CertificateFactory cf = CertificateFactory.getInstance("X509");
             return cf.generateCertificate(fis);
         } catch (FileNotFoundException | CertificateException e) {
@@ -288,10 +290,12 @@ public class Cifra_Server {
             FileInputStream kfile = new FileInputStream(keystore);  //keystore
             KeyStore kstore = KeyStore.getInstance("PKCS12");
             kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
-            Key myprivatekey = kstore.getKey("myServer",passKeyStore.toCharArray());
+            // GETS PUBLIC KEY FROM CERTIFICATE
+
             Certificate cert = kstore.getCertificate("myServer");
             PublicKey publicKey = cert.getPublicKey();
             Signature s = Signature.getInstance("MD5withRSA");
+
             s.initVerify(publicKey);
 
             s.update(b.getPreviousHash());
@@ -307,7 +311,7 @@ public class Cifra_Server {
             }
 
             return s.verify(signature);
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException  | CertificateException | KeyStoreException | IOException e) {
             throw new RuntimeException(e);
         }
     }
