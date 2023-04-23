@@ -74,9 +74,8 @@ public class WineHandler {
 	 * @param winePath	caminho do vinho
 	 * @return false se o vinho ja existe, true se nao existir e for bem adicionado
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	public boolean addWine(String winename, String winePath) throws ClassNotFoundException, IOException {
+	public boolean addWine(String winename, String winePath) throws IOException {
 		if(!wineIntegrity(this.wines)) {
 			System.out.println("Erro ao adicionar vinho: ficheiro corrompido");
 			System.exit(-1);
@@ -95,9 +94,8 @@ public class WineHandler {
 	 * @param username	nome do utilizador 
 	 * @return true se for adicionado com sucesso, false caso contrario (??)
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	public boolean addWalletUser(String username) throws ClassNotFoundException, IOException {
+	public boolean addWalletUser(String username) throws IOException {
 		if(!walletIntegrity(this.wallet)) {
 			System.out.println("Erro ao adicionar wallet: ficheiro corrompido");
 			System.exit(-1);
@@ -116,9 +114,8 @@ public class WineHandler {
 	 * @param price		preco pelo qual o vinho vai ser vendido
 	 * @return 1 se tudo correr bem, 0 se houver diferencas no preco do vinho, -1 se o vinho nao existe
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	public int sellWine(String winename,String username,int quantity, int price) throws ClassNotFoundException, IOException {
+	public int sellWine(String winename,String username,int quantity, int price) throws IOException {
 		if(!wineIntegrity(this.wines)) {
 			System.out.println("Erro ao vender vinho: ficheiro corrompido");
 			System.exit(-1);
@@ -152,9 +149,8 @@ public class WineHandler {
 	 * @return 0 se o user nao existe, 1 caso a compra seja efetuada, -1 caso o vinho nao exista,
 	 * -4 caso o cliente nao exista, -3 caso a quantidade seja superior e existente, -2 caso nao tenha saldo suficiente
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	public int buyWine(String winename, String seller, String user, int quantity) throws ClassNotFoundException, IOException {
+	public int buyWine(String winename, String seller, String user, int quantity) throws IOException {
 		if(!walletIntegrity(this.wallet)) {
 			System.out.println("Erro ao comprar vinho: ficheiro das wallets corrompido");
 			System.exit(-1);
@@ -214,9 +210,8 @@ public class WineHandler {
 	 * @param rating	classificacao atribuida
 	 * @return true caso o vinho exista, false caso contrario
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	public boolean classify(String winename,int rating) throws ClassNotFoundException, IOException {
+	public boolean classify(String winename,int rating) throws IOException {
 		if(!wineIntegrity(this.wines)) {
 			System.out.println("Erro ao classificar vinho: ficheiro dos wines corrompido");
 			System.exit(-1);
@@ -233,9 +228,8 @@ public class WineHandler {
 	 * @param winepath	path do ficheiro dos wines
 	 * @return true caso a atualizacao tenha sido bem sucedida, false caso contrario
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	private boolean updateWineFile(String winepath) throws ClassNotFoundException, IOException {
+	private boolean updateWineFile(String winepath) {
 		FileOutputStream fileOut;
 		try {
 			fileOut = new FileOutputStream(winepath, false);
@@ -259,9 +253,8 @@ public class WineHandler {
 	 * @param walletpath	path do ficheiro wallet
 	 * @return true caso a atualizacao tenha sido bem sucedida, false caso contrario
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
-	private boolean updateWalletFile(String walletpath) throws ClassNotFoundException, IOException {
+	private boolean updateWalletFile(String walletpath) {
 		FileOutputStream fileOut;
 		try {
 			fileOut = new FileOutputStream(walletpath, false);
@@ -287,7 +280,7 @@ public class WineHandler {
 		return this.catwallet.getList();
 	}
 
-	private byte[] readFile(String filepath) throws IOException, ClassNotFoundException {
+	private byte[] readFile(String filepath) throws IOException {
 		File f = new File(filepath);
 		FileInputStream fis = new FileInputStream(filepath);
 		byte[] data = new byte[(int) f.length()];
@@ -295,7 +288,7 @@ public class WineHandler {
 		return data;
 	}
 
-	private boolean wineIntegrity(String winepath) throws IOException, ClassNotFoundException {
+	private boolean wineIntegrity(String winepath) throws IOException {
 		byte[] data = readFile(winepath);
 		if(this.wineDigest == null) {
 			this.wineDigest = md.digest(data);
@@ -305,7 +298,7 @@ public class WineHandler {
 		}
 	}
 
-	private boolean walletIntegrity(String walletpath) throws IOException, ClassNotFoundException {
+	private boolean walletIntegrity(String walletpath) throws IOException {
 		byte[] data = readFile(walletpath);
 		if(this.walletDigest == null) {
 			this.walletDigest = md.digest(data);

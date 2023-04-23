@@ -41,7 +41,7 @@ public class MessageHandler {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public boolean addMensagem(String from, String to, byte[] mensagem) throws ClassNotFoundException, IOException {
+	public boolean addMensagem(String from, String to, byte[] mensagem) throws IOException {
 		if(!msgIntegrity(this.messagesPath)) {
 			System.out.println("Erro ao adicionar mensagem: ficheiro corrompido");
 			System.exit(-1);
@@ -67,7 +67,7 @@ public class MessageHandler {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public List<Mensagem> readMessagesbyUser(String user) throws ClassNotFoundException, IOException {
+	public List<Mensagem> readMessagesbyUser(String user) throws IOException {
 		if(!msgIntegrity(this.messagesPath)) {
 			System.out.println("Erro ao ler as mensagens: ficheiro corrompido");
 			System.exit(-1);
@@ -82,7 +82,7 @@ public class MessageHandler {
 
 	}
 
-	private boolean updateMensagemFile(String mensagempath) throws ClassNotFoundException {
+	private boolean updateMensagemFile(String mensagempath) {
 		FileOutputStream fileOut;
 		try {
 			fileOut = new FileOutputStream(mensagempath, false);
@@ -106,7 +106,7 @@ public class MessageHandler {
 		this.allUsers.add(user);
 	}
 
-	private byte[] readFile(String filepath) throws IOException, ClassNotFoundException {
+	private byte[] readFile(String filepath) throws IOException {
 		File f = new File(filepath);
 		FileInputStream fis = new FileInputStream(filepath);
 		byte[] data = new byte[(int) f.length()];
@@ -114,7 +114,7 @@ public class MessageHandler {
 		return data;
 	}
 
-	private boolean msgIntegrity(String msgpath) throws IOException, ClassNotFoundException {
+	private boolean msgIntegrity(String msgpath) throws IOException {
 		byte[] data = readFile(msgpath);
 		if(this.msgDigest == null) {
 			this.msgDigest = md.digest(data);
