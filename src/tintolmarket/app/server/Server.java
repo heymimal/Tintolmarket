@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,8 +72,9 @@ public class Server {
 
 	/**
 	 * Start the server
+	 * @throws NoSuchAlgorithmException
 	 */
-	public void startServer (int PORT){ //will receive values
+	public void startServer (int PORT) throws NoSuchAlgorithmException{ //will receive values
 		//ServerSocket sSoc = null;
 
 		ServerSocketFactory ssf = SSLServerSocketFactory.getDefault();

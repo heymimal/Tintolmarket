@@ -1,9 +1,13 @@
 package tintolmarket.handlers;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import tintolmarket.domain.catalogs.*;
 import tintolmarket.domain.Wine;
@@ -20,13 +24,23 @@ public class WineHandler {
 	private CatalogoWallet catwallet;
 	private String wines;
 	private String wallet;
-	
+	private MessageDigest md;
+	//private String digestFile;
+	private byte[] wineDigest;
+	private byte[] walletDigest;
+
+
 	/**
 	 * Construtor do Handler dos Vinhos
+	 * @throws NoSuchAlgorithmException
 	 */
-	public WineHandler() {
+	public WineHandler() throws NoSuchAlgorithmException {
 		this.catwine = CatalogoWine.getInstance(null);
 		this.catwallet = CatalogoWallet.getInstance(null);
+		this.md = MessageDigest.getInstance("SHA");
+		//this.digestFile = "digest.txt";
+		this.wineDigest = null;
+		this.walletDigest = null;
 	}
 	
 	/**
@@ -34,12 +48,16 @@ public class WineHandler {
 	 * @param o2	object 2
 	 * @param wines path para ficheiro dos wines
 	 * @param wallet path para ficheiro das wallets
+	 * @throws NoSuchAlgorithmException
 	 */
-	public WineHandler(String wines,String wallet,Object o1,Object o2) {
+	public WineHandler(String wines,String wallet,Object o1,Object o2) throws NoSuchAlgorithmException {
 		this.wines = wines;
 		this.wallet = wallet;
 		this.catwine = CatalogoWine.getInstance(o1);
 		this.catwallet = CatalogoWallet.getInstance(o2);
+		this.md = MessageDigest.getInstance("SHA");
+		this.wineDigest = null;
+		this.walletDigest = null;
 	}
 	
 	/**
@@ -55,8 +73,13 @@ public class WineHandler {
 	 * @param winename	nome do vinho
 	 * @param winePath	caminho do vinho
 	 * @return false se o vinho ja existe, true se nao existir e for bem adicionado
+	 * @throws IOException
 	 */
-	public boolean addWine(String winename, String winePath) {
+	public boolean addWine(String winename, String winePath) throws IOException {
+		if(!wineIntegrity(this.wines)) {
+			System.out.println("Erro ao adicionar vinho: ficheiro corrompido");
+			System.exit(-1);
+		}
 		boolean b = this.catwine.addWine(winename, winePath);
 		if(b) {
 			System.out.println("Vinho ainda não existia");
@@ -70,8 +93,13 @@ public class WineHandler {
 	 * 
 	 * @param username	nome do utilizador 
 	 * @return true se for adicionado com sucesso, false caso contrario (??)
+	 * @throws IOException
 	 */
-	public boolean addWalletUser(String username) {
+	public boolean addWalletUser(String username) throws IOException {
+		if(!walletIntegrity(this.wallet)) {
+			System.out.println("Erro ao adicionar wallet: ficheiro corrompido");
+			System.exit(-1);
+		}
 		boolean b= this.catwallet.addWallet(username);
 		this.updateWalletFile(this.wallet);
 		return b;
@@ -85,8 +113,13 @@ public class WineHandler {
 	 * @param quantity	quantidade a ser vendida
 	 * @param price		preco pelo qual o vinho vai ser vendido
 	 * @return 1 se tudo correr bem, 0 se houver diferencas no preco do vinho, -1 se o vinho nao existe
+	 * @throws IOException
 	 */
-	public int sellWine(String winename,String username,int quantity, int price) {
+	public int sellWine(String winename,String username,int quantity, int price) throws IOException {
+		if(!wineIntegrity(this.wines)) {
+			System.out.println("Erro ao vender vinho: ficheiro corrompido");
+			System.exit(-1);
+		}
 		int n = this.catwine.sellWine(winename, username, quantity, price);
 		if(n == 1) {
 			this.updateWineFile(this.wines);
@@ -115,8 +148,17 @@ public class WineHandler {
 	 * @param quantity	quantidade de vinho que vai ser comprada
 	 * @return 0 se o user nao existe, 1 caso a compra seja efetuada, -1 caso o vinho nao exista,
 	 * -4 caso o cliente nao exista, -3 caso a quantidade seja superior e existente, -2 caso nao tenha saldo suficiente
+	 * @throws IOException
 	 */
-	public int buyWine(String winename, String seller, String user, int quantity) {
+	public int buyWine(String winename, String seller, String user, int quantity) throws IOException {
+		if(!walletIntegrity(this.wallet)) {
+			System.out.println("Erro ao comprar vinho: ficheiro das wallets corrompido");
+			System.exit(-1);
+		}
+		if(!wineIntegrity(this.wines)) {
+			System.out.println("Erro ao comprar vinho: ficheiro dos wines corrompido");
+			System.exit(-1);
+		}
 		Wallet walletUser = getWalletUser(user);
 		if(walletUser.getClass() == Wallet.class) {
 			int walletValue = walletUser.getWallet();
@@ -167,8 +209,13 @@ public class WineHandler {
 	 * @param winename	nome do vinho
 	 * @param rating	classificacao atribuida
 	 * @return true caso o vinho exista, false caso contrario
+	 * @throws IOException
 	 */
-	public boolean classify(String winename,int rating) {
+	public boolean classify(String winename,int rating) throws IOException {
+		if(!wineIntegrity(this.wines)) {
+			System.out.println("Erro ao classificar vinho: ficheiro dos wines corrompido");
+			System.exit(-1);
+		}
 		boolean b =  this.catwine.rateWine(winename, rating);
 		this.updateWineFile(this.wines);
 		return b;
@@ -180,6 +227,7 @@ public class WineHandler {
 	 * 
 	 * @param winepath	path do ficheiro dos wines
 	 * @return true caso a atualizacao tenha sido bem sucedida, false caso contrario
+	 * @throws IOException
 	 */
 	private boolean updateWineFile(String winepath) {
 		FileOutputStream fileOut;
@@ -189,6 +237,7 @@ public class WineHandler {
 			out.writeObject(this.getCatWine());
 			out.close();
 			fileOut.close();
+			this.wineDigest = this.md.digest(readFile(winepath));
 			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -203,6 +252,7 @@ public class WineHandler {
 	 * 
 	 * @param walletpath	path do ficheiro wallet
 	 * @return true caso a atualizacao tenha sido bem sucedida, false caso contrario
+	 * @throws IOException
 	 */
 	private boolean updateWalletFile(String walletpath) {
 		FileOutputStream fileOut;
@@ -212,6 +262,7 @@ public class WineHandler {
 			out.writeObject(this.getCatWallet());
 			out.close();
 			fileOut.close();
+			this.walletDigest = this.md.digest(readFile(walletpath));
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -228,7 +279,34 @@ public class WineHandler {
 	private List<Wallet> getCatWallet(){
 		return this.catwallet.getList();
 	}
+  
+	private byte[] readFile(String filepath) throws IOException {
+		File f = new File(filepath);
+		FileInputStream fis = new FileInputStream(filepath);
+		byte[] data = new byte[(int) f.length()];
+		fis.close();
+		return data;
+	}
 
+	private boolean wineIntegrity(String winepath) throws IOException {
+		byte[] data = readFile(winepath);
+		if(this.wineDigest == null) {
+			this.wineDigest = md.digest(data);
+			return true;
+		} else {
+			return MessageDigest.isEqual(md.digest(data), this.wineDigest);
+		}
+	}
+
+	private boolean walletIntegrity(String walletpath) throws IOException {
+		byte[] data = readFile(walletpath);
+		if(this.walletDigest == null) {
+			this.walletDigest = md.digest(data);
+			return true;
+		} else {
+			return MessageDigest.isEqual(md.digest(data), this.walletDigest);
+		}
+	}
     public int getPriceWine(String winename, String wineseller) {
 		return this.catwine.getPriceWine(winename,wineseller);
     }
