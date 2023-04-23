@@ -369,11 +369,24 @@ public class ClientConector {
 		
 		
 	}
+	public String list() {
+		try {
+			this.out.writeObject(Operacao.LIST);
+			boolean b = (boolean) this.in.readObject();
+			if (b) {
 
-	
-	/*public String getUsername() {
-		return username;
-	}*/
+				String resposta = (String) this.in.readObject();
+				return resposta;
+
+				// devolve erro se não existir
+			} else {
+				System.out.println("Erro no servidor.");
+			}
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return "Ainda nao ocorreram transacoes!";
+	}
 
 	/**
 	 * @param username
@@ -393,6 +406,7 @@ public class ClientConector {
 	private void setTrustStore(String truststore) {
 		this.truststore = truststore;
 	}
-	
+
+
 
 }
