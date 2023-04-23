@@ -1,7 +1,7 @@
 package tintolmarket.app.security;
 
-import tintolmarket.app.testesBlockChain.BlockTintol;
-import tintolmarket.app.testesBlockChain.Transaction;
+import tintolmarket.domain.blockchain.BlockTintol;
+import tintolmarket.domain.blockchain.Transaction;
 import tintolmarket.domain.Tipo;
 
 import javax.crypto.*;
@@ -261,7 +261,55 @@ public class Cifra_Server {
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public boolean verificaBlockChain(BlockTintol b, byte[] previous_hash, byte[] currentHash){
+        boolean hashCompare = false;
+        try {
+            hashCompare = compareHash(previous_hash,currentHash);
+            System.out.println("Valor do hashCompare = "+ hashCompare);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        byte[] signature = b.getSignature();
+        boolean s = verifyBlockSignature(signature,b);
+        System.out.println("Valor do verifyBlockSignature = "+ s);
+
+        return s && hashCompare;
+    }
+
+    private boolean compareHash(byte[] previousHash, byte[] currentHash) throws NoSuchAlgorithmException {
+        //MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        return MessageDigest.isEqual(previousHash,currentHash);
+    }
+
+    private boolean verifyBlockSignature(byte[] signature, BlockTintol b) {
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            Key myprivatekey = kstore.getKey("myServer",passKeyStore.toCharArray());
+            Certificate cert = kstore.getCertificate("myServer");
+            PublicKey publicKey = cert.getPublicKey();
+            Signature s = Signature.getInstance("MD5withRSA");
+            s.initVerify(publicKey);
+
+            s.update(b.getPreviousHash());
+            s.update((byte) b.getIndex());
+            s.update((byte) b.getN_trx());
+            for(Transaction t : b.getTransactions()){
+                s.update(t.getNome_vinho().getBytes());
+                s.update((byte) t.getnEntidades());
+                s.update((byte)t.getValor());
+                s.update(t.getUser().getBytes());
+                s.update(t.getTipo().toString().getBytes());
+                s.update(t.getSignature());
+            }
+
+            return s.verify(signature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public byte[] getServerSignature(BlockTintol bloco) {
@@ -273,7 +321,7 @@ public class Cifra_Server {
             Signature s = Signature.getInstance("MD5withRSA");
             s.initSign((PrivateKey) myprivatekey);
 
-            s.update(bloco.getPreviousHash().getBytes());
+            s.update(bloco.getPreviousHash());
             s.update((byte) bloco.getIndex());
             s.update((byte) bloco.getN_trx());
             for(Transaction t : bloco.getTransactions()){
@@ -286,15 +334,7 @@ public class Cifra_Server {
             }
 
             return s.sign();
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException e) {
-            throw new RuntimeException(e);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (CertificateException e) {
-            throw new RuntimeException(e);
-        } catch (KeyStoreException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException e) {
             throw new RuntimeException(e);
         }
     }
