@@ -7,8 +7,6 @@ import java.util.List;
 
 import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.catalogs.CatalogoMensagem;
-/*import tintolmarket.domain.catalogs.CatalogoWallet;
-import tintolmarket.domain.catalogs.CatalogoWine;*/
 
 /**
  * Handler das Mensagens
@@ -46,7 +44,7 @@ public class MessageHandler {
 	public boolean addMensagem(String from, String to, byte[] mensagem) throws ClassNotFoundException, IOException {
 		if(!msgIntegrity(this.messagesPath)) {
 			System.out.println("Erro ao adicionar mensagem: ficheiro corrompido");
-			return false;
+			System.exit(-1);
 		}
 		boolean toExists = this.allUsers.contains(from);
 		if(toExists){
@@ -72,7 +70,7 @@ public class MessageHandler {
 	public List<Mensagem> readMessagesbyUser(String user) throws ClassNotFoundException, IOException {
 		if(!msgIntegrity(this.messagesPath)) {
 			System.out.println("Erro ao ler as mensagens: ficheiro corrompido");
-			return null;
+			System.exit(-1);
 		}
 		List<Mensagem> lm;
 		synchronized (catMensagem){
@@ -92,7 +90,7 @@ public class MessageHandler {
 			out.writeObject(catMensagem.getCatMensagem());
 			out.close();
 			fileOut.close();
-			this.msgDigest = this.md.digest(readFile(mensagempath).getBytes());
+			this.msgDigest = this.md.digest(readFile(mensagempath));
 			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -108,27 +106,21 @@ public class MessageHandler {
 		this.allUsers.add(user);
 	}
 
-	private String readFile(String filepath) throws IOException, ClassNotFoundException {
+	private byte[] readFile(String filepath) throws IOException, ClassNotFoundException {
+		File f = new File(filepath);
 		FileInputStream fis = new FileInputStream(filepath);
-		ObjectInputStream ois = new ObjectInputStream(fis);
-		Object o = ois.readObject();
-		if (!(o instanceof String)) {
-			System.out.println("error");
-			System.exit(-1);
-		}
-		String data = (String) o;
+		byte[] data = new byte[(int) f.length()];
 		fis.close();
-		ois.close();
 		return data;
 	}
 
 	private boolean msgIntegrity(String msgpath) throws IOException, ClassNotFoundException {
-		String data = readFile(msgpath);
-		if(this.msgDigest.equals(null)) {
-			this.msgDigest = md.digest(data.getBytes());
+		byte[] data = readFile(msgpath);
+		if(this.msgDigest == null) {
+			this.msgDigest = md.digest(data);
 			return true;
 		} else {
-			return MessageDigest.isEqual(md.digest(data.getBytes()), this.msgDigest);
+			return MessageDigest.isEqual(md.digest(data), this.msgDigest);
 		}
 	}
 }

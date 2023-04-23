@@ -1,9 +1,9 @@
 package tintolmarket.handlers;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 import java.security.MessageDigest;
@@ -11,7 +11,6 @@ import java.security.NoSuchAlgorithmException;
 
 import tintolmarket.domain.catalogs.*;
 import tintolmarket.domain.Wine;
-//import tintolmarket.app.server.Server;
 import tintolmarket.domain.Wallet;
 
 /**
@@ -26,6 +25,7 @@ public class WineHandler {
 	private String wines;
 	private String wallet;
 	private MessageDigest md;
+	//private String digestFile;
 	private byte[] wineDigest;
 	private byte[] walletDigest;
 
@@ -38,6 +38,7 @@ public class WineHandler {
 		this.catwine = CatalogoWine.getInstance(null);
 		this.catwallet = CatalogoWallet.getInstance(null);
 		this.md = MessageDigest.getInstance("SHA");
+		//this.digestFile = "digest.txt";
 		this.wineDigest = null;
 		this.walletDigest = null;
 	}
@@ -78,7 +79,7 @@ public class WineHandler {
 	public boolean addWine(String winename, String winePath) throws ClassNotFoundException, IOException {
 		if(!wineIntegrity(this.wines)) {
 			System.out.println("Erro ao adicionar vinho: ficheiro corrompido");
-			return false;
+			System.exit(-1);
 		}
 		boolean b = this.catwine.addWine(winename, winePath);
 		if(b) {
@@ -99,7 +100,7 @@ public class WineHandler {
 	public boolean addWalletUser(String username) throws ClassNotFoundException, IOException {
 		if(!walletIntegrity(this.wallet)) {
 			System.out.println("Erro ao adicionar wallet: ficheiro corrompido");
-			return false;
+			System.exit(-1);
 		}
 		boolean b= this.catwallet.addWallet(username);
 		this.updateWalletFile(this.wallet);
@@ -120,7 +121,7 @@ public class WineHandler {
 	public int sellWine(String winename,String username,int quantity, int price) throws ClassNotFoundException, IOException {
 		if(!wineIntegrity(this.wines)) {
 			System.out.println("Erro ao vender vinho: ficheiro corrompido");
-			//TODO return -2 ou exit;
+			System.exit(-1);
 		}
 		int n = this.catwine.sellWine(winename, username, quantity, price);
 		if(n == 1) {
@@ -156,11 +157,11 @@ public class WineHandler {
 	public int buyWine(String winename, String seller, String user, int quantity) throws ClassNotFoundException, IOException {
 		if(!walletIntegrity(this.wallet)) {
 			System.out.println("Erro ao comprar vinho: ficheiro das wallets corrompido");
-			//TODO return -5 ou exit;
+			System.exit(-1);
 		}
 		if(!wineIntegrity(this.wines)) {
 			System.out.println("Erro ao comprar vinho: ficheiro dos wines corrompido");
-			//TODO return -5 ou exit;
+			System.exit(-1);
 		}
 		Wallet walletUser = getWalletUser(user);
 		if(walletUser.getClass() == Wallet.class) {
@@ -218,7 +219,7 @@ public class WineHandler {
 	public boolean classify(String winename,int rating) throws ClassNotFoundException, IOException {
 		if(!wineIntegrity(this.wines)) {
 			System.out.println("Erro ao classificar vinho: ficheiro dos wines corrompido");
-			return false;
+			System.exit(-1);
 		}
 		boolean b =  this.catwine.rateWine(winename, rating);
 		this.updateWineFile(this.wines);
@@ -242,7 +243,7 @@ public class WineHandler {
 			out.writeObject(this.getCatWine());
 			out.close();
 			fileOut.close();
-			this.wineDigest = this.md.digest(readFile(winepath).getBytes());
+			this.wineDigest = this.md.digest(readFile(winepath));
 			return true;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -268,7 +269,7 @@ public class WineHandler {
 			out.writeObject(this.getCatWallet());
 			out.close();
 			fileOut.close();
-			this.walletDigest = this.md.digest(readFile(walletpath).getBytes());
+			this.walletDigest = this.md.digest(readFile(walletpath));
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -286,37 +287,31 @@ public class WineHandler {
 		return this.catwallet.getList();
 	}
 
-	private String readFile(String filepath) throws IOException, ClassNotFoundException {
+	private byte[] readFile(String filepath) throws IOException, ClassNotFoundException {
+		File f = new File(filepath);
 		FileInputStream fis = new FileInputStream(filepath);
-		ObjectInputStream ois = new ObjectInputStream(fis);
-		Object o = ois.readObject();
-		if (!(o instanceof String)) {
-			System.out.println("error");
-			System.exit(-1);
-		}
-		String data = (String) o;
+		byte[] data = new byte[(int) f.length()];
 		fis.close();
-		ois.close();
 		return data;
 	}
 
 	private boolean wineIntegrity(String winepath) throws IOException, ClassNotFoundException {
-		String data = readFile(winepath);
-		if(this.wineDigest.equals(null)) {
-			this.wineDigest = md.digest(data.getBytes());
+		byte[] data = readFile(winepath);
+		if(this.wineDigest == null) {
+			this.wineDigest = md.digest(data);
 			return true;
 		} else {
-			return MessageDigest.isEqual(md.digest(data.getBytes()), this.wineDigest);
+			return MessageDigest.isEqual(md.digest(data), this.wineDigest);
 		}
 	}
 
 	private boolean walletIntegrity(String walletpath) throws IOException, ClassNotFoundException {
-		String data = readFile(walletpath);
-		if(this.walletDigest.equals(null)) {
-			this.walletDigest = md.digest(data.getBytes());
+		byte[] data = readFile(walletpath);
+		if(this.walletDigest == null) {
+			this.walletDigest = md.digest(data);
 			return true;
 		} else {
-			return MessageDigest.isEqual(md.digest(data.getBytes()), this.walletDigest);
+			return MessageDigest.isEqual(md.digest(data), this.walletDigest);
 		}
 	}
 }
