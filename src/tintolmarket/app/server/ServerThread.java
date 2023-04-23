@@ -82,16 +82,16 @@ public class ServerThread extends Thread {
 					this.op = (Operacao)inStream.readObject();
 					System.out.println("Operarion: "+ this.op);
 					switch(this.op) {
-
 						case ADD:{
 							outStream.writeObject(true);
 							String winename = (String) inStream.readObject();
-							String winepath= "server_"+(String) inStream.readObject();
+							String temp = (String) inStream.readObject();
+							String winepath= "server_"+winename+"."+temp.split("[.]")[1];
 							boolean resposta = wh.addWine(winename,winepath);
 							outStream.writeObject(resposta);
 							if(resposta) {
 								byte[] bytes = new byte[8*1024];
-								File newImage = new File(winepath);
+								File newImage = new File(wh.getVinhosFolder(),winepath);
 								newImage.createNewFile();
 								long length = (long) inStream.readObject();
 								OutputStream outStreamImg = new FileOutputStream(newImage);
@@ -182,7 +182,7 @@ public class ServerThread extends Thread {
 								outStream.writeObject(vervinho[0]);
 								String[] temp = vervinho[1].split("[.]");
 								outStream.writeObject(temp[1]);
-								File file = new File(vervinho[1]);
+								File file = new File(wh.getVinhosFolder(),vervinho[1]);
 								long length = file.length();
 								outStream.writeObject(length);
 								byte[] bytes = new byte [1024];
