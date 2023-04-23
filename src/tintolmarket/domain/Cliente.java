@@ -44,7 +44,7 @@ public class Cliente implements Serializable {
 	 *@return string com a informacao acerca do cliente
 	 */
 	public String toString() {
-		return "Cliente: "+ this.username + " preço: " + this.price + " Unidades: " + this.quantity + "\n";
+		return "Cliente: "+ this.username + " preco: " + this.price + " Unidades: " + this.quantity + "\n";
 	}
 	
 	

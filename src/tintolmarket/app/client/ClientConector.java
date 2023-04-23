@@ -8,8 +8,10 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.management.ThreadInfo;
 import java.util.List;
 
+import tintolmarket.app.Tintolmarket;
 import tintolmarket.app.security.ClientSecurity;
 import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.Operacao;
@@ -90,7 +92,6 @@ public class ClientConector {
 			}
 
 		}catch (IOException | ClassNotFoundException e) {
-			System.err.println(e.getMessage());
 			System.exit(-1);
 		}
 		return false;

@@ -1,11 +1,6 @@
 package tintolmarket.domain.catalogs;
 
 import tintolmarket.domain.Mensagem;
-import tintolmarket.domain.Wallet;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,22 +32,27 @@ public class CatalogoMensagem {
     }
 
     public void addMensagem(String from, String to, byte[] message){
-        // Falta serializaçao
+
         Mensagem m = new Mensagem(from,to,message);
-        this.catMensagem.add(m);
+        synchronized (catMensagem){
+            this.catMensagem.add(m);
+        }
+
     }
 
     public List<Mensagem> getMensagensToUser(String to){
         List<Mensagem> newCat = new ArrayList<>();
         List<Mensagem> mensagemsUser = new ArrayList<>();
-        for (Mensagem m:this.catMensagem){
-            if(m.getTo().equals(to)){
-                mensagemsUser.add(m);
-            } else {
-                newCat.add(m);
+        synchronized (catMensagem){
+            for (Mensagem m:this.catMensagem){
+                if(m.getTo().equals(to)){
+                    mensagemsUser.add(m);
+                } else {
+                    newCat.add(m);
+                }
             }
+            this.catMensagem = newCat;
         }
-        this.catMensagem = newCat;
         return mensagemsUser;
     }
 

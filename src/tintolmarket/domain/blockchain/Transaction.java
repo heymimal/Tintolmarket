@@ -17,6 +17,14 @@ public class Transaction implements Serializable {
 
     private byte[] signature;
 
+    public Transaction(String nome_vinho, int nEntidades, int valor, String user, Tipo tipo) {
+        this.nome_vinho = nome_vinho;
+        this.nEntidades = nEntidades;
+        this.valor = valor;
+        this.user = user;
+        this.tipo = tipo;
+    }
+
     public String getNome_vinho() {
         return nome_vinho;
     }
@@ -41,13 +49,6 @@ public class Transaction implements Serializable {
         return signature;
     }
 
-    public Transaction(String nome_vinho, int nEntidades, int valor, String user, Tipo tipo) {
-        this.nome_vinho = nome_vinho;
-        this.nEntidades = nEntidades;
-        this.valor = valor;
-        this.user = user;
-        this.tipo = tipo;
-    }
 
     public void setSignature(byte[] signature) {
         this.signature = signature;
@@ -57,8 +58,6 @@ public class Transaction implements Serializable {
         if(this.tipo == Tipo.SELL){
             return "Foram colocadas "+this.nEntidades + " unidades do vinho " + this.nome_vinho +
                     " pelo utilizador "+ this.user +" ao preco de "+this.valor +".";
-                    //a identificação
-            //do vinho, o número de unidades criadas, o valor de cada unidade, e a identificação do seu dono
         } else {
             return "O utilizador " + this.user +" comprou " + this.nEntidades +" do vinho " + this.nome_vinho +
                     ", tendo custado cada unidade "+ this.valor +".";

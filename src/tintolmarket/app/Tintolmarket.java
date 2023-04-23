@@ -12,6 +12,8 @@ import tintolmarket.app.client.ClientConector;
  */
 public class Tintolmarket{
 	public static ClientConector c; //Conexao
+
+	public static Boolean isConnected = false;
 	
 	public static void main(String[] args) {
 
@@ -49,8 +51,8 @@ public class Tintolmarket{
 		} else {
 		System.out.println("Conexao estabelecida!");
 		printMenu();
-		boolean b = true;
-		while(b) {
+		isConnected = true;
+		while(isConnected) {
 			System.out.print("Insere: ");
 			String command = sc.next();
 				switch(command) {
