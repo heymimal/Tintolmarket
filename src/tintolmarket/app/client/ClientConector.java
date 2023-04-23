@@ -35,6 +35,8 @@ public class ClientConector {
 	private SSLSocket clientSocket;
 	private ClientSecurity clientSecurity;
 
+	private final File clientFolder;
+
 	/**
 	 * Construtor do Client_stub
 	 * 
@@ -49,7 +51,10 @@ public class ClientConector {
 		this.address = setAddress(address);
 		setUsername(username);
 		this.clientSecurity = new ClientSecurity(keystore,passKeyStore,username,truststore);
-
+		this.clientFolder = new File(username+"_Tintol");
+		if(this.clientFolder.mkdir()){
+			System.out.println("Folder created!");
+		}
 		clientSocket = null;
 		
 	}
@@ -339,13 +344,17 @@ public class ClientConector {
 			this.out.writeObject(winename);
 			Boolean existe = (Boolean) this.in.readObject();
 			if(existe){
+
 				String info = (String) this.in.readObject();
 				String extensao = (String) this.in.readObject();
 				long tamanho = (long) this.in.readObject();
+
 				byte[] bytes = new byte[1024];
-				String newPath = "view_"+winename+"."+extensao;
-				File newImage = new File(newPath);
+
+				String newPath = "view_"+winename+"_"+username+"."+extensao;
+				File newImage = new File(clientFolder,newPath); // cria na pasta do cliente a imagem
 				newImage.createNewFile();
+
 				OutputStream outStreamImg = new FileOutputStream(newImage);
 				int count;
 				long total = 0;
@@ -354,9 +363,8 @@ public class ClientConector {
 					outStreamImg.write(bytes, 0, count);
 				}
 				outStreamImg.close();
-				System.out.println("Abs:" + newImage.getAbsolutePath());
-				System.out.println("normal "+newImage.getPath());
-				return info + "\nImagem do vinho encontra-se em: "+ newPath + "\n";
+
+				return info + "\nImagem do vinho encontra-se em: "+ newImage.getAbsolutePath() + "\n";
 			} else {
 				return "Vinho nao existe!";
 			}
