@@ -1,5 +1,7 @@
 package tintolmarket.app.security;
 
+import tintolmarket.domain.blockchain.BlockTintol;
+import tintolmarket.domain.blockchain.Transaction;
 import tintolmarket.domain.Tipo;
 
 import javax.crypto.*;
@@ -17,8 +19,13 @@ public class Cifra_Server {
 
     private String password;
 
-    public Cifra_Server(String password){
+    private String keystore;
+    private String passKeyStore;
+
+    public Cifra_Server(String password, String keystore, String passKeyStore){
         this.password = password;
+        this.keystore = keystore;
+        this.passKeyStore = passKeyStore;
     }
 
     public boolean[] serverAutenticate(ObjectOutputStream outStream, ObjectInputStream inStream, String user) throws NoSuchPaddingException, NoSuchAlgorithmException {
@@ -254,21 +261,82 @@ public class Cifra_Server {
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public boolean verificaBlockChain(BlockTintol b, byte[] previous_hash, byte[] currentHash){
+        boolean hashCompare = false;
+        try {
+            hashCompare = compareHash(previous_hash,currentHash);
+            System.out.println("Valor do hashCompare = "+ hashCompare);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        byte[] signature = b.getSignature();
+        boolean s = verifyBlockSignature(signature,b);
+        System.out.println("Valor do verifyBlockSignature = "+ s);
 
-        /*
-        Certificate c = … //obtém um certificado de alguma forma (ex., de um ficheiro)
-PublicKey pk = c.getPublicKey( );
-Signature s = Signature.getInstance("MD5withRSA");
-s.initVerify(pk);
-s.update(data.getBytes( ));
-if (s.verify(signature))
-System.out.println("Message is valid");
-else
-System.out.println("Message was corrupted");
-fis.close();
+        return s && hashCompare;
+    }
 
-         */
+    private boolean compareHash(byte[] previousHash, byte[] currentHash) throws NoSuchAlgorithmException {
+        //MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        return MessageDigest.isEqual(previousHash,currentHash);
+    }
+
+    private boolean verifyBlockSignature(byte[] signature, BlockTintol b) {
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            Key myprivatekey = kstore.getKey("myServer",passKeyStore.toCharArray());
+            Certificate cert = kstore.getCertificate("myServer");
+            PublicKey publicKey = cert.getPublicKey();
+            Signature s = Signature.getInstance("MD5withRSA");
+            s.initVerify(publicKey);
+
+            s.update(b.getPreviousHash());
+            s.update((byte) b.getIndex());
+            s.update((byte) b.getN_trx());
+            for(Transaction t : b.getTransactions()){
+                s.update(t.getNome_vinho().getBytes());
+                s.update((byte) t.getnEntidades());
+                s.update((byte)t.getValor());
+                s.update(t.getUser().getBytes());
+                s.update(t.getTipo().toString().getBytes());
+                s.update(t.getSignature());
+            }
+
+            return s.verify(signature);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public byte[] getServerSignature(BlockTintol bloco) {
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            Key myprivatekey = kstore.getKey("myServer",passKeyStore.toCharArray());
+            Signature s = Signature.getInstance("MD5withRSA");
+            s.initSign((PrivateKey) myprivatekey);
+
+            s.update(bloco.getPreviousHash());
+            s.update((byte) bloco.getIndex());
+            s.update((byte) bloco.getN_trx());
+            for(Transaction t : bloco.getTransactions()){
+                s.update(t.getNome_vinho().getBytes());
+                s.update((byte) t.getnEntidades());
+                s.update((byte)t.getValor());
+                s.update(t.getUser().getBytes());
+                s.update(t.getTipo().toString().getBytes());
+                s.update(t.getSignature());
+            }
+
+            return s.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

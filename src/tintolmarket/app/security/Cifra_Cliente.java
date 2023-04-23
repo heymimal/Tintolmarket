@@ -1,7 +1,6 @@
 package tintolmarket.app.security;
 
 import tintolmarket.domain.Tipo;
-import tintolmarket.domain.Transacao;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;

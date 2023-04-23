@@ -8,5 +8,6 @@ public enum Operacao {
 	WALLET,
 	CLASSIFY,
 	TALK,
-	READ
+	READ,
+	LIST
 }
