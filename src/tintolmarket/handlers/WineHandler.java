@@ -7,7 +7,6 @@ import java.util.List;
 
 import tintolmarket.domain.catalogs.*;
 import tintolmarket.domain.Wine;
-import tintolmarket.app.server.Server;
 import tintolmarket.domain.Wallet;
 
 /**
@@ -230,4 +229,7 @@ public class WineHandler {
 		return this.catwallet.getList();
 	}
 
+    public int getPriceWine(String winename, String wineseller) {
+		return this.catwine.getPriceWine(winename,wineseller);
+    }
 }
