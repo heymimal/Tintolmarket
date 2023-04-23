@@ -1,7 +1,6 @@
 package tintolmarket.app.server;
 import tintolmarket.app.security.Cifra_Server;
-import tintolmarket.app.testesBlockChain.BlockTintol;
-import tintolmarket.app.testesBlockChain.Transaction;
+import tintolmarket.domain.blockchain.Transaction;
 import tintolmarket.domain.*;
 import tintolmarket.handlers.*;
 
@@ -32,6 +31,8 @@ public class ServerThread extends Thread {
 	private WineHandler wh;
 	private MessageHandler mh;
 
+	private BlockchainHandler bh;
+
 	private Cifra_Server auth;
 	//will have mutex for access to .txt files and possibly others
 
@@ -43,10 +44,11 @@ public class ServerThread extends Thread {
      * @param mh    handler das mensagens
      * @param auth
      */
-	public ServerThread(Socket inSoc, WineHandler wh, MessageHandler mh, Cifra_Server auth) {
+	public ServerThread(Socket inSoc, WineHandler wh, MessageHandler mh,BlockchainHandler bh, Cifra_Server auth) {
 		socket = inSoc;
 		this.wh = wh;
 		this.mh = mh;
+		this.bh = bh;
 		this.auth = auth;
 		System.out.println("thread do server para cada cliente");
 	}
@@ -54,14 +56,6 @@ public class ServerThread extends Thread {
 	@Override
 	public void run(){
 		boolean connected = false;
-		BlockchainHandler bch = null;
-		try {
-			bch = new BlockchainHandler(auth);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
 		try {
 			ObjectOutputStream outStream = new ObjectOutputStream(socket.getOutputStream());
 			ObjectInputStream inStream = new ObjectInputStream(socket.getInputStream());
@@ -122,12 +116,18 @@ public class ServerThread extends Thread {
 							Tipo t = (Tipo) inStream.readObject();
 							byte[] signature = (byte[]) inStream.readObject();
 							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user,t);
-							System.out.println(b);
-							int resposta = wh.buyWine(winename, wineseller, user, quantity);
-							if(resposta == 1){
-								// criar objeto transacao e operacoes respetivas da blockchain
+							if(b){
+								int resposta = wh.buyWine(winename, wineseller, user, quantity);
+								if(resposta == 1){
+									Transaction tr = new Transaction(winename, quantity, value, user, t);
+									tr.setSignature(signature);
+									bh.addTransaction(tr);
+									// criar objeto transacao e operacoes respetivas da blockchain
+								}
+								outStream.writeObject(resposta);
+							} else {
+								outStream.writeObject(false);
 							}
-							outStream.writeObject(resposta);
 							break;
 						}case CLASSIFY:{
 							outStream.writeObject(true);
@@ -152,12 +152,12 @@ public class ServerThread extends Thread {
 							byte signature[] = (byte[]) inStream.readObject( );
 							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user,t);
 							if(b){
-								Transaction tr = new Transaction(winename, quantity, value, user, t);
-								tr.setSignature(signature);
-								bch.addTransaction(tr);
 								int resposta = wh.sellWine(winename, user, quantity, value);
 								if(resposta==1){
 									// criar objeto transacao e operacoes respetivas da blockchain
+									Transaction tr = new Transaction(winename, quantity, value, user, t);
+									tr.setSignature(signature);
+									bh.addTransaction(tr);
 								}
 								outStream.writeObject(resposta);
 							} else {
@@ -197,10 +197,15 @@ public class ServerThread extends Thread {
 							}
 							//send to user*/
 							break;
-						}case WALLET:{
+						}case WALLET: {
 							outStream.writeObject(true);
 							int wallet = wh.getWallerUser(user);
 							outStream.writeObject(wallet);
+							break;
+						}case LIST:	{
+							outStream.writeObject(true);
+							String transacoes =bh.list();
+							outStream.writeObject(transacoes);
 							break;
 						}default:
 							break;
