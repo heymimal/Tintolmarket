@@ -54,10 +54,12 @@ public class ServerThread extends Thread {
 	@Override
 	public void run(){
 		boolean connected = false;
-		BlockchainHandler bch = new BlockchainHandler(auth);
+		BlockchainHandler bch = null;
 		try {
-			bch.createBlock(1,"hash_nova");
+			bch = new BlockchainHandler(auth);
 		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
 		try {

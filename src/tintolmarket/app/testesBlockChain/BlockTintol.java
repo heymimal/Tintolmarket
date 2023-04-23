@@ -15,7 +15,7 @@ public class BlockTintol implements Serializable {
     public BlockTintol(long blk_id, String previousHash) {
         this.blk_id = blk_id;
         this.previousHash = previousHash;
-        this.transactions = new ArrayList<Transaction>();
+        this.transactions = new ArrayList<>();
         n_trx = transactions.size();
 
     }
@@ -49,5 +49,9 @@ public class BlockTintol implements Serializable {
 
     public long getN_trx() {
         return n_trx;
+    }
+
+    public boolean isFull() {
+        return this.n_trx == 5;
     }
 }
