@@ -1,5 +1,5 @@
 package tintolmarket.app.server;
-import tintolmarket.app.security.Cifra_Server;
+import tintolmarket.app.security.ServerSecurity;
 import tintolmarket.domain.blockchain.Transaction;
 import tintolmarket.domain.*;
 import tintolmarket.handlers.*;
@@ -33,7 +33,7 @@ public class ServerThread extends Thread {
 
 	private BlockchainHandler bh;
 
-	private Cifra_Server auth;
+	private ServerSecurity auth;
 	//will have mutex for access to .txt files and possibly others
 
 	/**
@@ -44,7 +44,7 @@ public class ServerThread extends Thread {
      * @param mh    handler das mensagens
      * @param auth
      */
-	public ServerThread(Socket inSoc, WineHandler wh, MessageHandler mh,BlockchainHandler bh, Cifra_Server auth) {
+	public ServerThread(Socket inSoc, WineHandler wh, MessageHandler mh,BlockchainHandler bh, ServerSecurity auth) {
 		socket = inSoc;
 		this.wh = wh;
 		this.mh = mh;

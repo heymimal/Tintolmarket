@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import tintolmarket.app.security.Cifra_Server;
+import tintolmarket.app.security.ServerSecurity;
 import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.Wine;
 import tintolmarket.handlers.BlockchainHandler;
@@ -34,7 +34,7 @@ public class Server {
 	public static final String wallet = "wallet.txt";
 	public static final String messages = "messages.txt";
 
-	public static Cifra_Server auth;
+	public static ServerSecurity auth;
 	
 	public static void main(String[] args) {
 		System.setProperty("javax.net.ssl.keyStore"
@@ -57,7 +57,7 @@ public class Server {
 				passCifra = args[1];
 				keyStore = args[2];
 				passKeyStore = args[3];
-				auth = new Cifra_Server(passCifra, keyStore, passKeyStore);
+				auth = new ServerSecurity(passCifra, keyStore, passKeyStore);
 				server.startServer(Integer.parseInt(args[0]));
 			}else{
 				System.out.println("Comando para correr servidor estah incorreto. \n" +
