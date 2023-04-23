@@ -12,6 +12,7 @@ import java.util.List;
 import tintolmarket.app.security.Cifra_Server;
 import tintolmarket.domain.Mensagem;
 import tintolmarket.domain.Wine;
+import tintolmarket.handlers.BlockchainHandler;
 import tintolmarket.handlers.MessageHandler;
 import tintolmarket.handlers.WineHandler;
 
@@ -56,7 +57,7 @@ public class Server {
 				passCifra = args[1];
 				keyStore = args[2];
 				passKeyStore = args[3];
-				auth = new Cifra_Server(passCifra);
+				auth = new Cifra_Server(passCifra, keyStore, passKeyStore);
 				server.startServer(Integer.parseInt(args[0]));
 			}else{
 				System.out.println("Comando para correr servidor estah incorreto. \n" +
@@ -81,6 +82,7 @@ public class Server {
 
 		WineHandler wh = null;
 		MessageHandler mh = null;
+		BlockchainHandler bh = null;
 		System.out.println(PORT);
         
 		try {
@@ -155,20 +157,20 @@ public class Server {
 	            	wh = new WineHandler(Server.wines,Server.wallet, wineCat,walletCat);
 	            }
 			}
-
+			bh = new BlockchainHandler(auth);
 		} catch (IOException e) {
 			System.err.println(e.getMessage());
 			System.exit(-1);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
 		while(true) { // change for multiple clients
 			try {
-				//Socket inSoc = sSoc.accept();
+
 				Socket inSoc = ss.accept();
 				System.out.println("Connection Established");
-				new ServerThread(inSoc,wh,mh, auth).start();
+				new ServerThread(inSoc,wh,mh,bh,auth).start();
 				//newServerThread.start();
 		    }
 		    catch (IOException e) {

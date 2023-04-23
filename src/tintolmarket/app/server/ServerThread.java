@@ -1,5 +1,6 @@
 package tintolmarket.app.server;
 import tintolmarket.app.security.Cifra_Server;
+import tintolmarket.domain.blockchain.Transaction;
 import tintolmarket.domain.*;
 import tintolmarket.handlers.*;
 
@@ -30,6 +31,8 @@ public class ServerThread extends Thread {
 	private WineHandler wh;
 	private MessageHandler mh;
 
+	private BlockchainHandler bh;
+
 	private Cifra_Server auth;
 	//will have mutex for access to .txt files and possibly others
 
@@ -41,10 +44,11 @@ public class ServerThread extends Thread {
      * @param mh    handler das mensagens
      * @param auth
      */
-	public ServerThread(Socket inSoc, WineHandler wh, MessageHandler mh, Cifra_Server auth) {
+	public ServerThread(Socket inSoc, WineHandler wh, MessageHandler mh,BlockchainHandler bh, Cifra_Server auth) {
 		socket = inSoc;
 		this.wh = wh;
 		this.mh = mh;
+		this.bh = bh;
 		this.auth = auth;
 		System.out.println("thread do server para cada cliente");
 	}
@@ -106,9 +110,24 @@ public class ServerThread extends Thread {
 							outStream.writeObject(true);
 							String winename = (String) inStream.readObject();
 							String wineseller = (String) inStream.readObject();
+							int value = wh.getPriceWine(winename,wineseller);
+							outStream.writeObject(value);
 							int quantity = (int) inStream.readObject();
-							int resposta = wh.buyWine(winename, wineseller, user, quantity);
-							outStream.writeObject(resposta);
+							Tipo t = (Tipo) inStream.readObject();
+							byte[] signature = (byte[]) inStream.readObject();
+							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user,t);
+							if(b){
+								int resposta = wh.buyWine(winename, wineseller, user, quantity);
+								if(resposta == 1){
+									Transaction tr = new Transaction(winename, quantity, value, user, t);
+									tr.setSignature(signature);
+									bh.addTransaction(tr);
+									// criar objeto transacao e operacoes respetivas da blockchain
+								}
+								outStream.writeObject(resposta);
+							} else {
+								outStream.writeObject(false);
+							}
 							break;
 						}case CLASSIFY:{
 							outStream.writeObject(true);
@@ -129,8 +148,21 @@ public class ServerThread extends Thread {
 							String winename = (String) inStream.readObject();
 							int value = (Integer) inStream.readObject();
 							int quantity = (Integer) inStream.readObject();
-							int resposta = wh.sellWine(winename, user, quantity, value);
-							outStream.writeObject(resposta);
+							Tipo t = (Tipo) inStream.readObject();
+							byte signature[] = (byte[]) inStream.readObject( );
+							boolean b = auth.verificaAssinatura(winename,value,quantity,signature,user,t);
+							if(b){
+								int resposta = wh.sellWine(winename, user, quantity, value);
+								if(resposta==1){
+									// criar objeto transacao e operacoes respetivas da blockchain
+									Transaction tr = new Transaction(winename, quantity, value, user, t);
+									tr.setSignature(signature);
+									bh.addTransaction(tr);
+								}
+								outStream.writeObject(resposta);
+							} else {
+								outStream.writeObject(-5);
+							}
 
 							//send to user
 							break;
@@ -165,10 +197,15 @@ public class ServerThread extends Thread {
 							}
 							//send to user*/
 							break;
-						}case WALLET:{
+						}case WALLET: {
 							outStream.writeObject(true);
 							int wallet = wh.getWallerUser(user);
 							outStream.writeObject(wallet);
+							break;
+						}case LIST:	{
+							outStream.writeObject(true);
+							String transacoes =bh.list();
+							outStream.writeObject(transacoes);
 							break;
 						}default:
 							break;

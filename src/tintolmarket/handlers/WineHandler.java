@@ -279,7 +279,7 @@ public class WineHandler {
 	private List<Wallet> getCatWallet(){
 		return this.catwallet.getList();
 	}
-
+  
 	private byte[] readFile(String filepath) throws IOException {
 		File f = new File(filepath);
 		FileInputStream fis = new FileInputStream(filepath);
@@ -307,4 +307,7 @@ public class WineHandler {
 			return MessageDigest.isEqual(md.digest(data), this.walletDigest);
 		}
 	}
+    public int getPriceWine(String winename, String wineseller) {
+		return this.catwine.getPriceWine(winename,wineseller);
+    }
 }

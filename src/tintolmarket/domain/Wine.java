@@ -206,4 +206,8 @@ public class Wine implements Serializable {
 	public String getWinePath() {
 		return this.winePath;
 	}
+
+	public List<Cliente> getClientes() {
+		return this.infoClientes;
+	}
 }

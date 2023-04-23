@@ -1,5 +1,7 @@
 package tintolmarket.app.security;
 
+import tintolmarket.domain.Tipo;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -91,6 +93,53 @@ public class Cifra_Cliente {
         } catch (UnrecoverableKeyException | NoSuchPaddingException | IllegalBlockSizeException | CertificateException |
                  KeyStoreException | IOException | NoSuchAlgorithmException | BadPaddingException |
                  InvalidKeyException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public byte[] transaction(String winename, int winevalue, int winequantity, String username, Tipo tipo){
+        try{
+
+            PrivateKey myprivateKey = getPrivateKey();
+            Signature s = Signature.getInstance("MD5withRSA");
+            s.initSign(myprivateKey);
+            s.update(winename.getBytes());
+            s.update((byte) winevalue);
+            s.update((byte) winequantity);
+            s.update(username.getBytes());
+            s.update(tipo.toString().getBytes());
+            return s.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public byte[] buyTransaction(String winename, int winevalue, int winequantity, String username){
+        try{
+
+            PrivateKey myprivateKey = getPrivateKey();
+            Signature s = Signature.getInstance("MD5withRSA");
+            s.initSign(myprivateKey);
+            s.update(winename.getBytes());
+            s.update((byte) winevalue);
+            s.update((byte) winequantity);
+            s.update(username.getBytes());
+            return s.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PrivateKey getPrivateKey() {
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            Key myprivatekey = kstore.getKey(username,passKeyStore.toCharArray());
+            return (PrivateKey)myprivatekey;
+        } catch (UnrecoverableKeyException | CertificateException | IOException | NoSuchAlgorithmException |
+                 KeyStoreException e) {
             throw new RuntimeException(e);
         }
 

@@ -3,6 +3,7 @@ package tintolmarket.domain.catalogs;
 import java.util.ArrayList;
 import java.util.List;
 
+import tintolmarket.domain.Cliente;
 import tintolmarket.domain.Wine;
 
 
@@ -151,4 +152,19 @@ public class CatalogoWine {
 		}
 	}
 
+    public int getPriceWine(String winename, String wineseller) {
+		synchronized (catWine){
+			for(Wine w:this.catWine){
+				if(w.getWineName().equals(winename)){
+					for(Cliente c:w.getClientes()){
+						if(c.getName().equals(wineseller)){
+							return c.getPrice();
+						}
+					}
+					break;
+				}
+			}
+		}
+		return 0;
+	}
 }

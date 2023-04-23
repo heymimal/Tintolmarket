@@ -1,5 +1,6 @@
 package tintolmarket.app;
 
+import java.awt.*;
 import java.util.Scanner;
 
 import tintolmarket.app.client.ClientConector;
@@ -150,6 +151,12 @@ public class Tintolmarket{
 				System.out.println(mensagens);
 				break;
 			}
+			case "l":
+			case "list":{
+				String transacoes = c.list();
+				System.out.println(transacoes);
+				break;
+			}
 			default:
 				break;
 			}
@@ -179,6 +186,8 @@ public class Tintolmarket{
 		System.out.println("- classify <wine> <stars> - atribui ao vinho wine uma classificação de 1 a 5, indicada por stars.");
 		System.out.println("- talk <user> <message> - permite enviar uma mensagem privada ao utilizador user.");
 		System.out.println("- read - permite ler as novas mensagens recebidas.");
+		System.out.println(" - list - obtem a lista de todas as transacoes que ja foram efetuadas e que se encontram\n" +
+				"armazenadas na blockchain");
 	}
 
 }
