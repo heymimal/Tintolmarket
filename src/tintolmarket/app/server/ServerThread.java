@@ -178,6 +178,7 @@ public class ServerThread extends Thread {
 							String winename = (String) inStream.readObject();
 							String [] vervinho = wh.viewWine(winename); //needs changes - image related
 							if(vervinho!= null) {
+								outStream.writeObject(true);
 								outStream.writeObject(vervinho[0]);
 								String[] temp = vervinho[1].split("[.]");
 								outStream.writeObject(temp[1]);
@@ -193,7 +194,7 @@ public class ServerThread extends Thread {
 								}
 								inF.close();
 							} else {
-								outStream.writeObject("Erro");
+								outStream.writeObject(false);
 							}
 							//send to user*/
 							break;

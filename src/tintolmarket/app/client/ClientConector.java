@@ -337,24 +337,30 @@ public class ClientConector {
 		try {
 			this.out.writeObject(Operacao.VIEW);
 			this.out.writeObject(winename);
-			String info = (String) this.in.readObject();
-			String extensao = (String) this.in.readObject();
-			long tamanho = (long) this.in.readObject();
-			byte[] bytes = new byte[1024];
-			String newPath = "view_"+winename+"."+extensao;
-			File newImage = new File(newPath);
-			newImage.createNewFile();
-			OutputStream outStreamImg = new FileOutputStream(newImage);
-	        int count;
-	        long total = 0;
-	        while ( (total < tamanho) && (count = this.in.read(bytes)) > 0 ) {
-	        	total += count;
-	            outStreamImg.write(bytes, 0, count);
-	        }
-	        outStreamImg.close();
-	        System.out.println("Abs:" + newImage.getAbsolutePath());
-	        System.out.println("normal "+newImage.getPath());
-	        return info + "\nImagem do vinho encontra-se em: "+ newPath + "\n";
+			Boolean existe = (Boolean) this.in.readObject();
+			if(existe){
+				String info = (String) this.in.readObject();
+				String extensao = (String) this.in.readObject();
+				long tamanho = (long) this.in.readObject();
+				byte[] bytes = new byte[1024];
+				String newPath = "view_"+winename+"."+extensao;
+				File newImage = new File(newPath);
+				newImage.createNewFile();
+				OutputStream outStreamImg = new FileOutputStream(newImage);
+				int count;
+				long total = 0;
+				while ( (total < tamanho) && (count = this.in.read(bytes)) > 0 ) {
+					total += count;
+					outStreamImg.write(bytes, 0, count);
+				}
+				outStreamImg.close();
+				System.out.println("Abs:" + newImage.getAbsolutePath());
+				System.out.println("normal "+newImage.getPath());
+				return info + "\nImagem do vinho encontra-se em: "+ newPath + "\n";
+			} else {
+				return "Vinho nao existe!";
+			}
+
 		
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
