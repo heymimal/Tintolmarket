@@ -6,6 +6,13 @@ public class Mensagem implements Serializable {
 
     private String from;
     private String to;
+    private byte[] message;
+
+    public Mensagem(String from,String to, byte[] message){
+        this.to = to;
+        this.from = from;
+        this.message = message;
+    }
 
     public String getFrom() {
         return from;
@@ -15,15 +22,7 @@ public class Mensagem implements Serializable {
         return to;
     }
 
-    private byte[] message;
-
     public byte[] getMessage() {
         return message;
-    }
-
-    public Mensagem(String from,String to, byte[] message){
-        this.to = to;
-        this.from = from;
-        this.message = message;
     }
 }

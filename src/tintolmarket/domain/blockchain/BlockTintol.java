@@ -16,7 +16,7 @@ public class BlockTintol implements Serializable {
         this.blk_id = blk_id;
         this.previousHash = previousHash;
         this.transactions = new ArrayList<>();
-        n_trx = transactions.size();
+        n_trx = 0;
 
     }
 
@@ -59,7 +59,8 @@ public class BlockTintol implements Serializable {
     public String toString(){
         StringBuilder sb = new StringBuilder();
         for (Transaction t: this.getTransactions()){
-            sb.append(t.toString()+"\n");
+            sb.append(t.toString());
+            sb.append("\n");
         }
         return sb.toString();
     }

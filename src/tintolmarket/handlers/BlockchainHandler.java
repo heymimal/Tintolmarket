@@ -2,7 +2,7 @@ package tintolmarket.handlers;
 
 import tintolmarket.domain.blockchain.BlockTintol;
 import tintolmarket.domain.blockchain.Transaction;
-import tintolmarket.app.security.Cifra_Server;
+import tintolmarket.app.security.ServerSecurity;
 
 import java.io.*;
 import java.security.MessageDigest;
@@ -15,9 +15,9 @@ public class BlockchainHandler {
 
     private long id;
 
-    private final Cifra_Server cs;
+    private final ServerSecurity cs;
 
-    public BlockchainHandler(Cifra_Server cs)  {
+    public BlockchainHandler(ServerSecurity cs)  {
         this.cs = cs;
         chainStartAndIntegrityCheck();
     }

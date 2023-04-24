@@ -41,22 +41,29 @@ public class MessageHandler {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public boolean addMensagem(String from, String to, byte[] mensagem) throws IOException {
-		if(!msgIntegrity(this.messagesPath)) {
-			System.out.println("Erro ao adicionar mensagem: ficheiro corrompido");
-			System.exit(-1);
-		}
-		boolean toExists = this.allUsers.contains(from);
-		if(toExists){
-			// Check file (?) -> verificar integridada
-			synchronized (catMensagem){
-				catMensagem.addMensagem(from,to,mensagem);
-			}//Atualizar ficheiro que guarda o catalogo
-		}
-		updateMensagemFile(this.messagesPath);
+	public boolean addMensagem(String from, String to, byte[] mensagem) {
+		try{
+			if(!msgIntegrity(this.messagesPath)) {
+				System.out.println("Erro ao adicionar mensagem: ficheiro corrompido");
+				System.exit(-1);
+			}
+			for(String u:this.allUsers){
+				System.out.println("Utilizador :" +u);
+			}
+			boolean toExists = this.allUsers.contains(to) && !from.equals(to);
+			if(toExists){
+				// Check file (?) -> verificar integridada
+				synchronized (catMensagem){
+					catMensagem.addMensagem(from,to,mensagem);
+				}//Atualizar ficheiro que guarda o catalogo
+			}
+			updateMensagemFile(this.messagesPath);
 
+			return toExists;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 
-		return toExists;
 	}
 	
 	/**
@@ -67,19 +74,22 @@ public class MessageHandler {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public List<Mensagem> readMessagesbyUser(String user) throws IOException {
-		if(!msgIntegrity(this.messagesPath)) {
-			System.out.println("Erro ao ler as mensagens: ficheiro corrompido");
-			System.exit(-1);
+	public List<Mensagem> readMessagesbyUser(String user) {
+		try{
+			if(!msgIntegrity(this.messagesPath)) {
+				System.out.println("Erro ao ler as mensagens: ficheiro corrompido");
+				System.exit(-1);
+			}
+			List<Mensagem> lm;
+			synchronized (catMensagem){
+				lm =  catMensagem.getMensagensToUser(user);
+			}
+			//Atualizar Info do catalogo
+			updateMensagemFile(this.messagesPath);
+			return lm;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-		List<Mensagem> lm;
-		synchronized (catMensagem){
-			lm =  catMensagem.getMensagensToUser(user);
-		}
-		//Atualizar Info do catalogo
-		updateMensagemFile(this.messagesPath);
-		return lm;
-
 	}
 
 	private boolean updateMensagemFile(String mensagempath) {
@@ -93,15 +103,10 @@ public class MessageHandler {
 			this.msgDigest = this.md.digest(readFile(mensagempath));
 			return true;
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return false;
 	}
-	/**
-	 * @return path do ficheiro das mensagens
-	 */
-
 	public void addUser(String user) {
 		this.allUsers.add(user);
 	}

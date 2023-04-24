@@ -29,20 +29,8 @@ public class WineHandler {
 	private byte[] wineDigest;
 	private byte[] walletDigest;
 
+	private final File vinhosFolder = new File("vinhos");
 
-	/**
-	 * Construtor do Handler dos Vinhos
-	 * @throws NoSuchAlgorithmException
-	 */
-	public WineHandler() throws NoSuchAlgorithmException {
-		this.catwine = CatalogoWine.getInstance(null);
-		this.catwallet = CatalogoWallet.getInstance(null);
-		this.md = MessageDigest.getInstance("SHA");
-		//this.digestFile = "digest.txt";
-		this.wineDigest = null;
-		this.walletDigest = null;
-	}
-	
 	/**
 	 * @param o1	object 1
 	 * @param o2	object 2
@@ -55,6 +43,7 @@ public class WineHandler {
 		this.wallet = wallet;
 		this.catwine = CatalogoWine.getInstance(o1);
 		this.catwallet = CatalogoWallet.getInstance(o2);
+		this.vinhosFolder.mkdir();
 		this.md = MessageDigest.getInstance("SHA");
 		this.wineDigest = null;
 		this.walletDigest = null;
@@ -310,4 +299,8 @@ public class WineHandler {
     public int getPriceWine(String winename, String wineseller) {
 		return this.catwine.getPriceWine(winename,wineseller);
     }
+
+	public File getVinhosFolder(){
+		return vinhosFolder;
+	}
 }

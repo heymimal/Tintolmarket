@@ -73,14 +73,13 @@ public class Wine implements Serializable {
 	private void changeRating(int newRating) {
 		if(this.rating != 0) {
 			this.rating = ((this.rating*counter)+newRating)/(counter+1);
-			this.counter++;
 		}
 		else {
 			this.rating = newRating;
-			this.counter++;
 		}
-		
-		
+		this.counter++;
+
+
 	}
 
 	/**
@@ -185,13 +184,17 @@ public class Wine implements Serializable {
 	 */
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Nome: "+this.wineName);
+		sb.append("Nome: ");
+		sb.append(this.wineName);
 		if(this.rating > 0) {
-			sb.append("\nClassificação: "+this.rating);
+			sb.append("\nClassificação: ");
+			sb.append(this.rating);
 		}
 		
 		if(this.totalAmount > 0) {
-			sb.append("\nUnidades Disponiveis (Total): "+ this.totalAmount + "\n");
+			sb.append("\nUnidades Disponiveis (Total): ");
+			sb.append(this.totalAmount);
+			sb.append("\n");
 			for (Cliente c:this.infoClientes) {
 				sb.append(c.toString());
 			}

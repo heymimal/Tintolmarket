@@ -15,17 +15,20 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Cifra_Server {
+public class ServerSecurity {
 
     private String password;
 
     private String keystore;
     private String passKeyStore;
 
-    public Cifra_Server(String password, String keystore, String passKeyStore){
+    private final File certificadosFolder = new File("certificados");
+
+    public ServerSecurity(String password, String keystore, String passKeyStore){
         this.password = password;
         this.keystore = keystore;
         this.passKeyStore = passKeyStore;
+        certificadosFolder.mkdir();
     }
 
     public boolean[] serverAutenticate(ObjectOutputStream outStream, ObjectInputStream inStream, String user) throws NoSuchPaddingException, NoSuchAlgorithmException {
@@ -33,10 +36,7 @@ public class Cifra_Server {
         boolean[] booleanArray = new boolean[2];
         String crttemp = decryptUsers(user,null);
         try{
-            boolean found = false;
-            if(!crttemp.isBlank()) {
-                found = true;
-            }
+            boolean found = !crttemp.isBlank();
             double nonce = generateNonce();
             outStream.writeObject(nonce);
 
@@ -45,19 +45,13 @@ public class Cifra_Server {
             double nonce_client;
             byte[] nonce_encoded;
             java.security.cert.Certificate cert;
-            //String certpth = user+"cert.pub";
+
+            nonce_client = (double) inStream.readObject();
+            nonce_encoded = (byte[])inStream.readObject();
             if(!found){
-                nonce_client = (double) inStream.readObject();
-                nonce_encoded = (byte[])inStream.readObject();
                 cert = (java.security.cert.Certificate)inStream.readObject();
-
             } else {
-                nonce_client = (double) inStream.readObject();
-                nonce_encoded = (byte[])inStream.readObject();
-
-                FileInputStream fis = new FileInputStream(crttemp);
-                CertificateFactory cf = CertificateFactory.getInstance("X509");
-                cert = cf.generateCertificate(fis);
+                cert = getCertificate(crttemp);
             }
             boolean equalNonce = nonce==nonce_client;
             Key publickeyuser = cert.getPublicKey();
@@ -76,7 +70,7 @@ public class Cifra_Server {
             if(checkAuth && !found){
                 String filename = user+"serverCert.cer";
 
-                File file = new File(filename);
+                File file = new File(certificadosFolder,filename);
 
                 FileOutputStream fis = new FileOutputStream(file);
                 fis.write(cert.getEncoded());
@@ -235,7 +229,8 @@ public class Cifra_Server {
 
     private Certificate getCertificate(String crttemp){
         try{
-            FileInputStream fis = new FileInputStream(crttemp);
+            File file = new File(certificadosFolder,crttemp);
+            FileInputStream fis = new FileInputStream(file);
             CertificateFactory cf = CertificateFactory.getInstance("X509");
             return cf.generateCertificate(fis);
         } catch (FileNotFoundException | CertificateException e) {
@@ -264,7 +259,7 @@ public class Cifra_Server {
     }
 
     public boolean verificaBlockChain(BlockTintol b, byte[] previous_hash, byte[] currentHash){
-        boolean hashCompare = false;
+        boolean hashCompare;
         try {
             hashCompare = compareHash(previous_hash,currentHash);
             System.out.println("Valor do hashCompare = "+ hashCompare);
@@ -288,26 +283,18 @@ public class Cifra_Server {
             FileInputStream kfile = new FileInputStream(keystore);  //keystore
             KeyStore kstore = KeyStore.getInstance("PKCS12");
             kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
-            Key myprivatekey = kstore.getKey("myServer",passKeyStore.toCharArray());
+            // GETS PUBLIC KEY FROM CERTIFICATE
+
             Certificate cert = kstore.getCertificate("myServer");
             PublicKey publicKey = cert.getPublicKey();
             Signature s = Signature.getInstance("MD5withRSA");
+
             s.initVerify(publicKey);
 
-            s.update(b.getPreviousHash());
-            s.update((byte) b.getIndex());
-            s.update((byte) b.getN_trx());
-            for(Transaction t : b.getTransactions()){
-                s.update(t.getNome_vinho().getBytes());
-                s.update((byte) t.getnEntidades());
-                s.update((byte)t.getValor());
-                s.update(t.getUser().getBytes());
-                s.update(t.getTipo().toString().getBytes());
-                s.update(t.getSignature());
-            }
+            updateSignature(b, s);
 
             return s.verify(signature);
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException  | CertificateException | KeyStoreException | IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -321,21 +308,25 @@ public class Cifra_Server {
             Signature s = Signature.getInstance("MD5withRSA");
             s.initSign((PrivateKey) myprivatekey);
 
-            s.update(bloco.getPreviousHash());
-            s.update((byte) bloco.getIndex());
-            s.update((byte) bloco.getN_trx());
-            for(Transaction t : bloco.getTransactions()){
-                s.update(t.getNome_vinho().getBytes());
-                s.update((byte) t.getnEntidades());
-                s.update((byte)t.getValor());
-                s.update(t.getUser().getBytes());
-                s.update(t.getTipo().toString().getBytes());
-                s.update(t.getSignature());
-            }
+            updateSignature(bloco, s);
 
             return s.sign();
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void updateSignature(BlockTintol bloco, Signature s) throws SignatureException {
+        s.update(bloco.getPreviousHash());
+        s.update((byte) bloco.getIndex());
+        s.update((byte) bloco.getN_trx());
+        for(Transaction t : bloco.getTransactions()){
+            s.update(t.getNome_vinho().getBytes());
+            s.update((byte) t.getnEntidades());
+            s.update((byte)t.getValor());
+            s.update(t.getUser().getBytes());
+            s.update(t.getTipo().toString().getBytes());
+            s.update(t.getSignature());
         }
     }
 }
