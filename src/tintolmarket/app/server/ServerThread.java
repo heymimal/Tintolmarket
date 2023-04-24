@@ -176,7 +176,7 @@ public class ServerThread extends Thread {
 							break;
 						}case VIEW:{
 							String winename = (String) inStream.readObject();
-							String [] vervinho = wh.viewWine(winename); //needs changes - image related
+							String [] vervinho = wh.viewWine(winename);
 							if(vervinho!= null) {
 								outStream.writeObject(true);
 								outStream.writeObject(vervinho[0]);
@@ -221,14 +221,12 @@ public class ServerThread extends Thread {
 				throw new RuntimeException(e);
 			}
 		}catch (ClassNotFoundException | IOException e1) {
-			//e1.printStackTrace();
 			connected = false;
 		}
 		System.out.println("Disconnecting...");
 		try {
 			this.socket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

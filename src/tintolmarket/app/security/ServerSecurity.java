@@ -280,13 +280,7 @@ public class ServerSecurity {
 
     private boolean verifyBlockSignature(byte[] signature, BlockTintol b) {
         try{
-            FileInputStream kfile = new FileInputStream(keystore);  //keystore
-            KeyStore kstore = KeyStore.getInstance("PKCS12");
-            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
-            // GETS PUBLIC KEY FROM CERTIFICATE
-
-            Certificate cert = kstore.getCertificate("myServer");
-            PublicKey publicKey = cert.getPublicKey();
+            PublicKey publicKey = getServerPublicKey();
             Signature s = Signature.getInstance("MD5withRSA");
 
             s.initVerify(publicKey);
@@ -294,24 +288,21 @@ public class ServerSecurity {
             updateSignature(b, s);
 
             return s.verify(signature);
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException  | CertificateException | KeyStoreException | IOException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException(e);
         }
     }
 
     public byte[] getServerSignature(BlockTintol bloco) {
         try{
-            FileInputStream kfile = new FileInputStream(keystore);  //keystore
-            KeyStore kstore = KeyStore.getInstance("PKCS12");
-            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
-            Key myprivatekey = kstore.getKey("myServer",passKeyStore.toCharArray());
+            Key myprivatekey = getServerPrivateKey();
             Signature s = Signature.getInstance("MD5withRSA");
             s.initSign((PrivateKey) myprivatekey);
 
             updateSignature(bloco, s);
 
             return s.sign();
-        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
             throw new RuntimeException(e);
         }
     }
@@ -327,6 +318,32 @@ public class ServerSecurity {
             s.update(t.getUser().getBytes());
             s.update(t.getTipo().toString().getBytes());
             s.update(t.getSignature());
+        }
+    }
+
+    private PrivateKey getServerPrivateKey(){
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            return(PrivateKey) kstore.getKey("myServer",passKeyStore.toCharArray());
+        } catch (UnrecoverableKeyException | CertificateException | KeyStoreException | IOException |
+                 NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private PublicKey getServerPublicKey(){
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            // GETS PUBLIC KEY FROM CERTIFICATE
+
+            Certificate cert = kstore.getCertificate("myServer");
+            return cert.getPublicKey();
+        } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 }
