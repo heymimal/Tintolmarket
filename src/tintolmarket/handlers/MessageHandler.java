@@ -47,7 +47,10 @@ public class MessageHandler {
 				System.out.println("Erro ao adicionar mensagem: ficheiro corrompido");
 				System.exit(-1);
 			}
-			boolean toExists = this.allUsers.contains(from);
+			for(String u:this.allUsers){
+				System.out.println("Utilizador :" +u);
+			}
+			boolean toExists = this.allUsers.contains(to) && !from.equals(to);
 			if(toExists){
 				// Check file (?) -> verificar integridada
 				synchronized (catMensagem){
