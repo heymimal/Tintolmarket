@@ -11,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 
 import tintolmarket.domain.catalogs.*;
 import tintolmarket.domain.Wine;
+import tintolmarket.app.security.ServerSecurity;
 import tintolmarket.domain.Wallet;
 
 /**
@@ -201,7 +202,7 @@ public class WineHandler {
 	 * @throws IOException
 	 */
 	public boolean classify(String winename,int rating) throws IOException {
-		if(!wineIntegrity(this.wines)) {
+		if(!ServerSecurity.fileIntegrity(this.wines, 1)) {
 			System.out.println("Erro ao classificar vinho: ficheiro dos wines corrompido");
 			System.exit(-1);
 		}
@@ -268,34 +269,7 @@ public class WineHandler {
 	private List<Wallet> getCatWallet(){
 		return this.catwallet.getList();
 	}
-  
-	private byte[] readFile(String filepath) throws IOException {
-		File f = new File(filepath);
-		FileInputStream fis = new FileInputStream(filepath);
-		byte[] data = new byte[(int) f.length()];
-		fis.close();
-		return data;
-	}
 
-	private boolean wineIntegrity(String winepath) throws IOException {
-		byte[] data = readFile(winepath);
-		if(this.wineDigest == null) {
-			this.wineDigest = md.digest(data);
-			return true;
-		} else {
-			return MessageDigest.isEqual(md.digest(data), this.wineDigest);
-		}
-	}
-
-	private boolean walletIntegrity(String walletpath) throws IOException {
-		byte[] data = readFile(walletpath);
-		if(this.walletDigest == null) {
-			this.walletDigest = md.digest(data);
-			return true;
-		} else {
-			return MessageDigest.isEqual(md.digest(data), this.walletDigest);
-		}
-	}
     public int getPriceWine(String winename, String wineseller) {
 		return this.catwine.getPriceWine(winename,wineseller);
     }

@@ -13,7 +13,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
+import java.util.Scanner;
 
 public class ServerSecurity {
 
@@ -23,6 +26,7 @@ public class ServerSecurity {
     private String passKeyStore;
 
     private final File certificadosFolder = new File("certificados");
+    private final File macFile = new File("macs");
 
     public ServerSecurity(String password, String keystore, String passKeyStore){
         this.password = password;
@@ -328,6 +332,85 @@ public class ServerSecurity {
             s.update(t.getTipo().toString().getBytes());
             s.update(t.getSignature());
         }
+    }
+
+    private byte[] readFile(String filepath) throws IOException {
+		File f = new File(filepath);
+		FileInputStream fis = new FileInputStream(filepath);
+		byte[] data = new byte[(int) f.length()];
+		fis.close();
+		return data;
+	}
+
+    /**
+     * Verifica a integridade de um ficheiro
+     * 
+     * @param filepath path do ficheiro a verificar
+     * @param contentType 0 - messages, 1 - wines, 2 - wallets
+     * @return true se o ficheiro nao foi alterado
+     * @requires {@code 0 <= contentType <= 2}
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public boolean fileIntegrity(String filepath, int contentType) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+        FileWriter fw = new FileWriter(this.macFile);
+        if(!this.macFile.exists()) {
+            this.macFile.createNewFile();
+            fw.write("0\n0\n0"); //messages, wines, wallets
+        }
+        fw.close();
+        String[] prevMacs = parseMacFile();
+        if(prevMacs.length < 3) {
+            System.out.println("Nao foi possivel verificar o ficheiro");
+            System.exit(-1);
+        }
+        Mac mac = Mac.getInstance("HmacSHA1");
+        //get key
+        mac.init(key);
+		byte[] buf = readFile(filepath);
+        mac.update(buf);
+        String newMac = Base64.getEncoder().encodeToString(mac.doFinal());
+		if(prevMacs[contentType] == "0") {
+            prevMacs[contentType] = newMac;
+			rewriteMacFile(prevMacs);
+			return true;
+		} else {
+			return prevMacs[contentType].equals(newMac);
+		}
+	}
+
+    /**
+     * Obtem um array de strings correspondentes aos MACs dos ficheiros do server a partir do ficheiro onde estao guardados
+     * 
+     * @return array de strings correspondentes aos MACs dos ficheiros do server
+     * @throws FileNotFoundException
+     */
+    private String[] parseMacFile() throws FileNotFoundException {
+        Scanner sc = new Scanner(this.macFile);
+        StringBuilder sb = new StringBuilder();
+        while(sc.hasNextLine()) {
+            sb.append(sc.nextLine() + "\n");
+        }
+        String[] split = sb.toString().split("\n");
+        sc.close();
+        return split;
+    }
+
+    /**
+     * Reescreve o ficheiro dos MACs, alterando um dos valores (ja contido no array que recebe)
+     * 
+     * @param macs o conteudo a escrever
+     * @throws IOException
+     */
+    private void rewriteMacFile(String[] macs) throws IOException {
+        this.macFile.delete();
+        this.macFile.createNewFile();
+        FileWriter fw = new FileWriter(this.macFile);
+        for(String s : macs) {
+            fw.write(s + "\n");
+        }
+        fw.close();
     }
 }
 
