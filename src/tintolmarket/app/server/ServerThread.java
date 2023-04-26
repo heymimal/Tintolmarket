@@ -63,7 +63,6 @@ public class ServerThread extends Thread {
 			String user = null;
 			try {
 				user = (String)inStream.readObject();
-				System.out.println("thread: depois de receber o user");
 				if (user.length() != 0){
 					outStream.writeObject(true);
 					boolean[] isconnected = auth.serverAutenticate(outStream,inStream,user);
@@ -76,7 +75,9 @@ public class ServerThread extends Thread {
 					outStream.writeObject(checkAuth);
 					connected = checkAuth;
 				}
-
+				if(connected){
+					System.out.println("Connection established!");
+				}
 				while(connected) {
 					System.out.println("Waiting for op...");
 					this.op = (Operacao)inStream.readObject();

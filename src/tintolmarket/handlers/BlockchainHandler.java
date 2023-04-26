@@ -186,6 +186,7 @@ public class BlockchainHandler {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Blockchain has been compromised");
             throw new RuntimeException(e);
         }
         return i;
