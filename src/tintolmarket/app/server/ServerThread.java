@@ -71,7 +71,12 @@ public class ServerThread extends Thread {
 					boolean checkAuth = isconnected[0];
 					boolean found = isconnected[1];
 					if(checkAuth &&!found) {
+						if(!auth.fileIntegrity(Macs.WALLET)) {
+							System.out.println("Ficheiro das wallets corrupto");
+							System.exit(-1);
+						}
 						this.wh.addWalletUser(user);
+						auth.updateMacFile(Macs.WALLET);
 						this.mh.addUser(user);
 					}
 					outStream.writeObject(checkAuth);
