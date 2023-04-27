@@ -84,7 +84,6 @@ public class BlockchainHandler {
         if(file.available()>0) {
             ObjectInputStream in = new ObjectInputStream(file);
             BlockTintol b = (BlockTintol) in.readObject();
-            System.out.println("index do bloco " + b.getIndex());
             in.close();
             return b;
         }
