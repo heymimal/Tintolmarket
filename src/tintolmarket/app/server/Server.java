@@ -57,7 +57,7 @@ public class Server {
 				passCifra = args[1];
 				keyStore = args[2];
 				passKeyStore = args[3];
-				auth = new ServerSecurity(passCifra, keyStore, passKeyStore);
+				auth = new ServerSecurity(passCifra, keyStore, passKeyStore,wines,wallet,messages);
 				server.startServer(Integer.parseInt(args[0]));
 			}else{
 				System.out.println("Comando para correr servidor estah incorreto. \n" +

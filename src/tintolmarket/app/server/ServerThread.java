@@ -1,4 +1,5 @@
 package tintolmarket.app.server;
+import tintolmarket.app.security.Macs;
 import tintolmarket.app.security.ServerSecurity;
 import tintolmarket.domain.blockchain.Transaction;
 import tintolmarket.domain.*;
@@ -85,7 +86,7 @@ public class ServerThread extends Thread {
 					System.out.println("Operarion: "+ this.op);
 					switch(this.op) {
 						case ADD:{
-							if(!auth.fileIntegrity("wines")) {
+							if(!auth.fileIntegrity(Macs.WINES)) {
 								System.out.println("Ficheiro dos wines corrupto");
 								System.exit(-1);
 							}
@@ -110,15 +111,15 @@ public class ServerThread extends Thread {
 								outStreamImg.close();
 								outStream.writeObject(true);
 							}
-							auth.updateMacFile("wines");
+							auth.updateMacFile(Macs.WINES);
 							//send to user
 							break;
 						}case BUY:{
-							if(!auth.fileIntegrity("wines")) {
+							if(!auth.fileIntegrity(Macs.WINES)) {
 								System.out.println("Ficheiro dos wines corrupto");
 								System.exit(-1);
 							}
-							if(!auth.fileIntegrity("wallets")) {
+							if(!auth.fileIntegrity(Macs.WALLET)) {
 								System.out.println("Ficheiro das wallets corrupto");
 								System.exit(-1);
 							}
@@ -144,11 +145,11 @@ public class ServerThread extends Thread {
 							} else {
 								outStream.writeObject(false);
 							}
-							auth.updateMacFile("wines");
-							auth.updateMacFile("wallets");
+							auth.updateMacFile(Macs.WINES);
+							auth.updateMacFile(Macs.WALLET);
 							break;
 						}case CLASSIFY:{
-							if(!auth.fileIntegrity("wines")) {
+							if(!auth.fileIntegrity(Macs.WINES)) {
 								System.out.println("Ficheiro dos wines corrupto");
 								System.exit(-1);
 							}
@@ -157,21 +158,22 @@ public class ServerThread extends Thread {
 							int stars = (int) inStream.readObject();
 							boolean resposta  = wh.classify(winename, stars);
 							outStream.writeObject(resposta);
-							auth.updateMacFile("wines");
+							auth.updateMacFile(Macs.WINES);
 							//send to user
 							break;
 						}case READ:{
-							if(!auth.fileIntegrity("messages")) {
+							if(!auth.fileIntegrity(Macs.MESSAGES)) {
 								System.out.println("Ficheiro das messages corrupto");
 								System.exit(-1);
 							}
 							outStream.writeObject(true);
 							List<Mensagem> mensagesLer = mh.readMessagesbyUser(user);
 							outStream.writeObject(mensagesLer);
+							auth.updateMacFile(Macs.MESSAGES);
 							//send to user
 							break;
 						}case SELL:{
-							if(!auth.fileIntegrity("wines")) {
+							if(!auth.fileIntegrity(Macs.WINES)) {
 								System.out.println("Ficheiro dos wines corrupto");
 								System.exit(-1);
 							}
@@ -194,11 +196,11 @@ public class ServerThread extends Thread {
 							} else {
 								outStream.writeObject(-5);
 							}
-							auth.updateMacFile("wines");
+							auth.updateMacFile(Macs.WINES);
 							//send to user
 							break;
 						}case TALK:{
-							if(!auth.fileIntegrity("messages")) {
+							if(!auth.fileIntegrity(Macs.MESSAGES)) {
 								System.out.println("Ficheiro das messages corrupto");
 								System.exit(-1);
 							}
@@ -207,7 +209,7 @@ public class ServerThread extends Thread {
 							byte[] message = (byte[]) inStream.readObject();
 							boolean resposta = mh.addMensagem(user, to, message);
 							outStream.writeObject(resposta);
-							auth.updateMacFile("messages");
+							auth.updateMacFile(Macs.MESSAGES);
 							//send to user
 							break;
 						}case VIEW:{
@@ -239,7 +241,7 @@ public class ServerThread extends Thread {
 							int wallet = wh.getWallerUser(user);
 							outStream.writeObject(wallet);
 							break;
-						}case LIST:	{
+						}case LIST: {
 							outStream.writeObject(true);
 							String transacoes =bh.list();
 							outStream.writeObject(transacoes);

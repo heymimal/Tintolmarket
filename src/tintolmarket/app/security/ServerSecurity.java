@@ -4,6 +4,7 @@ import tintolmarket.domain.blockchain.BlockTintol;
 import tintolmarket.domain.blockchain.Transaction;
 import tintolmarket.domain.Tipo;
 
+import java.util.Arrays;
 import javax.crypto.*;
 import javax.crypto.spec.PBEKeySpec;
 import java.io.*;
@@ -22,16 +23,27 @@ public class ServerSecurity {
     private String keystore;
     private String passKeyStore;
 
-    private final File certificadosFolder = new File("certificados");
-    private final File msgMac = new File("msgMac");
-    private final File wineMac = new File("wineMac");
-    private final File walletMac = new File("walletMac");
+    private static  String users;
+    private static  String wines;
+    private static  String wallet;
+    private static  String messages;
 
-    public ServerSecurity(String password, String keystore, String passKeyStore){
+    private final File certificadosFolder = new File("certificados");
+
+    private final File macFolder = new File("Macs");
+    private final File msgMac = new File(macFolder,"msgMac");
+    private final File wineMac = new File(macFolder,"wineMac");
+    private final File walletMac = new File(macFolder,"walletMac");
+
+    public ServerSecurity(String password, String keystore, String passKeyStore, String wines, String wallet, String messages){
         this.password = password;
         this.keystore = keystore;
         this.passKeyStore = passKeyStore;
+        this.wines = wines;
+        this.wallet = wallet;
+        this.messages = messages;
         certificadosFolder.mkdir();
+        macFolder.mkdir();
     }
 
     public boolean[] serverAutenticate(ObjectOutputStream outStream, ObjectInputStream inStream, String user) throws NoSuchPaddingException, NoSuchAlgorithmException {
@@ -328,8 +340,20 @@ public class ServerSecurity {
         try{
             FileInputStream kfile = new FileInputStream(keystore);  //keystore
             KeyStore kstore = KeyStore.getInstance("PKCS12");
-            kstore.load(kfile, passKeyStore.toCharArray());           //password para aceder à keystore
+            kstore.load(kfile, passKeyStore.toCharArray());
             return(PrivateKey) kstore.getKey("myServer",passKeyStore.toCharArray());
+        } catch (UnrecoverableKeyException | CertificateException | KeyStoreException | IOException |
+                 NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private SecretKey sx(){
+        try{
+            FileInputStream kfile = new FileInputStream(keystore);  //keystore
+            KeyStore kstore = KeyStore.getInstance("PKCS12");
+            kstore.load(kfile, passKeyStore.toCharArray());
+            return (SecretKey) kstore.getKey("secKey",passKeyStore.toCharArray());
         } catch (UnrecoverableKeyException | CertificateException | KeyStoreException | IOException |
                  NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -340,54 +364,57 @@ public class ServerSecurity {
     private byte[] readFile(String filepath) throws IOException {
 		File f = new File(filepath);
 		FileInputStream fis = new FileInputStream(filepath);
-		byte[] data = new byte[(int) f.length()];
+        byte[] data = null;
+        if(f.length()>0){
+            data = new byte[(int) f.length()];
+        }
 		fis.close();
 		return data;
 	}
 
     /**
      * Verifica a integridade de um ficheiro
-     * 
-     * @param filepath path do ficheiro a verificar
-     * @param contentType 0 - messages, 1 - wines, 2 - wallets
+     *
      * @return true se o ficheiro nao foi alterado
      * @requires {@code 0 <= contentType <= 2}
      * @throws IOException
      * @throws NoSuchAlgorithmException
      * @throws InvalidKeyException
      */
-    public boolean fileIntegrity(String filepath) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+    public boolean fileIntegrity(Macs mac) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
         File macFile = null;
-        switch(filepath) {
-            case "messages":
+        String filepath = null;
+        switch(mac) {
+            case MESSAGES:
                 macFile = this.msgMac;
+                filepath = this.messages;
                 break;
-            case "wines":
+            case WINES:
                 macFile = this.wineMac;
+                filepath = this.wines;
                 break;
-            case "wallets":
+            case WALLET:
                 macFile = this.walletMac;
+                filepath = this.wallet;
                 break;
         }
-        if(macFile == null) {
-            //System.exit(-1);?
-        }
-        if(!macFile.exists()) {
+        macFile.createNewFile();
+        /*if(!macFile.exists()) {
             macFile.createNewFile();
-        }
+        }*/
         byte[] prevMac = parseMacFile(macFile);
         byte[] newMac = computeMac(filepath);
 		if(prevMac == null) {
 			rewriteMacFile(newMac, macFile);
 			return true;
 		} else {
-			return prevMac == newMac;
+			return Arrays.equals(prevMac,newMac);
 		}
 	}
 
     private byte[] computeMac(String filepath) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
         Mac mac = Mac.getInstance("HmacSHA1");
-        PrivateKey key = getServerPrivateKey();
+        Key key = sx();
         mac.init(key);
 		byte[] buf = readFile(filepath);
         mac.update(buf);
@@ -427,27 +454,40 @@ public class ServerSecurity {
     }
 
     //?
-    public void updateMacFile(String filepath) throws InvalidKeyException, NoSuchAlgorithmException, IOException {
-        File macFile = fileSelector(filepath);
+    public void updateMacFile(Macs mc) throws InvalidKeyException, NoSuchAlgorithmException, IOException {
+        File macFile = fileSelector(mc);
         macFile.delete();
         macFile.createNewFile();
+        String filepath = getFilePath(mc);
         byte[] mac = computeMac(filepath);
         FileOutputStream fos = new FileOutputStream(macFile);
         fos.write(mac);
         fos.close();
     }
 
-    private File fileSelector(String filepath) {
-        switch(filepath) {
-            case "messages":
+    private String getFilePath(Macs mc) {
+        switch (mc) {
+            case MESSAGES:
+                return this.messages;
+            case WINES:
+                return this.wines;
+            case WALLET:
+                return this.wallet;
+        }
+        return null;
+    }
+
+    private File fileSelector(Macs mc) {
+        switch (mc) {
+            case MESSAGES:
                 return this.msgMac;
-            case "wines":
+            case WINES:
                 return this.wineMac;
-            case "wallets":
+            case WALLET:
                 return this.walletMac;
         }
         return null;
-
+    }
     private PublicKey getServerPublicKey(){
         try{
             FileInputStream kfile = new FileInputStream(keystore);  //keystore
