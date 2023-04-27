@@ -15,6 +15,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
@@ -84,6 +85,10 @@ public class ServerThread extends Thread {
 					System.out.println("Operarion: "+ this.op);
 					switch(this.op) {
 						case ADD:{
+							if(!auth.fileIntegrity("wines")) {
+								System.out.println("Ficheiro dos wines corrupto");
+								System.exit(-1);
+							}
 							outStream.writeObject(true);
 							String winename = (String) inStream.readObject();
 							String temp = (String) inStream.readObject();
@@ -105,9 +110,18 @@ public class ServerThread extends Thread {
 								outStreamImg.close();
 								outStream.writeObject(true);
 							}
+							auth.updateMacFile("wines");
 							//send to user
 							break;
 						}case BUY:{
+							if(!auth.fileIntegrity("wines")) {
+								System.out.println("Ficheiro dos wines corrupto");
+								System.exit(-1);
+							}
+							if(!auth.fileIntegrity("wallets")) {
+								System.out.println("Ficheiro das wallets corrupto");
+								System.exit(-1);
+							}
 							outStream.writeObject(true);
 							String winename = (String) inStream.readObject();
 							String wineseller = (String) inStream.readObject();
@@ -125,26 +139,42 @@ public class ServerThread extends Thread {
 									bh.addTransaction(tr);
 									// criar objeto transacao e operacoes respetivas da blockchain
 								}
+
 								outStream.writeObject(resposta);
 							} else {
 								outStream.writeObject(false);
 							}
+							auth.updateMacFile("wines");
+							auth.updateMacFile("wallets");
 							break;
 						}case CLASSIFY:{
+							if(!auth.fileIntegrity("wines")) {
+								System.out.println("Ficheiro dos wines corrupto");
+								System.exit(-1);
+							}
 							outStream.writeObject(true);
 							String winename = (String) inStream.readObject();
 							int stars = (int) inStream.readObject();
 							boolean resposta  = wh.classify(winename, stars);
 							outStream.writeObject(resposta);
+							auth.updateMacFile("wines");
 							//send to user
 							break;
 						}case READ:{
+							if(!auth.fileIntegrity("messages")) {
+								System.out.println("Ficheiro das messages corrupto");
+								System.exit(-1);
+							}
 							outStream.writeObject(true);
 							List<Mensagem> mensagesLer = mh.readMessagesbyUser(user);
 							outStream.writeObject(mensagesLer);
 							//send to user
 							break;
 						}case SELL:{
+							if(!auth.fileIntegrity("wines")) {
+								System.out.println("Ficheiro dos wines corrupto");
+								System.exit(-1);
+							}
 							outStream.writeObject(true);
 							String winename = (String) inStream.readObject();
 							int value = (Integer) inStream.readObject();
@@ -164,15 +194,20 @@ public class ServerThread extends Thread {
 							} else {
 								outStream.writeObject(-5);
 							}
-
+							auth.updateMacFile("wines");
 							//send to user
 							break;
 						}case TALK:{
+							if(!auth.fileIntegrity("messages")) {
+								System.out.println("Ficheiro das messages corrupto");
+								System.exit(-1);
+							}
 							outStream.writeObject(true);
 							String to = (String) inStream.readObject();
 							byte[] message = (byte[]) inStream.readObject();
 							boolean resposta = mh.addMensagem(user, to, message);
 							outStream.writeObject(resposta);
+							auth.updateMacFile("messages");
 							//send to user
 							break;
 						}case VIEW:{
@@ -220,6 +255,9 @@ public class ServerThread extends Thread {
 				throw new RuntimeException(e);
 			} catch (NoSuchAlgorithmException e) {
 				throw new RuntimeException(e);
+			} catch (InvalidKeyException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}catch (ClassNotFoundException | IOException e1) {
 			connected = false;

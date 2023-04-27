@@ -23,6 +23,9 @@ public class ServerSecurity {
     private String passKeyStore;
 
     private final File certificadosFolder = new File("certificados");
+    private final File msgMac = new File("msgMac");
+    private final File wineMac = new File("wineMac");
+    private final File walletMac = new File("walletMac");
 
     public ServerSecurity(String password, String keystore, String passKeyStore){
         this.password = password;
@@ -333,6 +336,118 @@ public class ServerSecurity {
         }
     }
 
+
+    private byte[] readFile(String filepath) throws IOException {
+		File f = new File(filepath);
+		FileInputStream fis = new FileInputStream(filepath);
+		byte[] data = new byte[(int) f.length()];
+		fis.close();
+		return data;
+	}
+
+    /**
+     * Verifica a integridade de um ficheiro
+     * 
+     * @param filepath path do ficheiro a verificar
+     * @param contentType 0 - messages, 1 - wines, 2 - wallets
+     * @return true se o ficheiro nao foi alterado
+     * @requires {@code 0 <= contentType <= 2}
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public boolean fileIntegrity(String filepath) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+        File macFile = null;
+        switch(filepath) {
+            case "messages":
+                macFile = this.msgMac;
+                break;
+            case "wines":
+                macFile = this.wineMac;
+                break;
+            case "wallets":
+                macFile = this.walletMac;
+                break;
+        }
+        if(macFile == null) {
+            //System.exit(-1);?
+        }
+        if(!macFile.exists()) {
+            macFile.createNewFile();
+        }
+        byte[] prevMac = parseMacFile(macFile);
+        byte[] newMac = computeMac(filepath);
+		if(prevMac == null) {
+			rewriteMacFile(newMac, macFile);
+			return true;
+		} else {
+			return prevMac == newMac;
+		}
+	}
+
+    private byte[] computeMac(String filepath) throws NoSuchAlgorithmException, InvalidKeyException, IOException {
+        Mac mac = Mac.getInstance("HmacSHA1");
+        PrivateKey key = getServerPrivateKey();
+        mac.init(key);
+		byte[] buf = readFile(filepath);
+        mac.update(buf);
+        return mac.doFinal();
+    }
+
+    /**
+     * Obtem um array de strings correspondentes aos MACs dos ficheiros do server a partir do ficheiro onde estao guardados
+     * 
+     * @return array de strings correspondentes aos MACs dos ficheiros do server
+     * @throws IOException
+     */
+    private byte[] parseMacFile(File macFile) throws IOException {
+        if(macFile.length() == 0) {
+            return null;
+        }
+        FileInputStream fis = new FileInputStream(macFile);
+        byte[] data = new byte[(int) macFile.length()];
+        fis.read(data);
+        fis.close();
+        return data;
+    }
+
+    /**
+     * Atualiza um dos ficheiros que contem um MAC.
+     * 
+     * @param macs o conteudo a escrever
+     * @param macFile o ficheiro a reescrever
+     * @throws IOException
+     */
+    private void rewriteMacFile(byte[] macs, File macFile) throws IOException {
+        macFile.delete();
+        macFile.createNewFile();
+        FileOutputStream fos = new FileOutputStream(macFile);
+        fos.write(macs);
+        fos.close();
+    }
+
+    //?
+    public void updateMacFile(String filepath) throws InvalidKeyException, NoSuchAlgorithmException, IOException {
+        File macFile = fileSelector(filepath);
+        macFile.delete();
+        macFile.createNewFile();
+        byte[] mac = computeMac(filepath);
+        FileOutputStream fos = new FileOutputStream(macFile);
+        fos.write(mac);
+        fos.close();
+    }
+
+    private File fileSelector(String filepath) {
+        switch(filepath) {
+            case "messages":
+                return this.msgMac;
+            case "wines":
+                return this.wineMac;
+            case "wallets":
+                return this.walletMac;
+        }
+        return null;
+
     private PublicKey getServerPublicKey(){
         try{
             FileInputStream kfile = new FileInputStream(keystore);  //keystore
@@ -345,6 +460,7 @@ public class ServerSecurity {
         } catch (KeyStoreException | IOException | CertificateException | NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
+
     }
 }
 
