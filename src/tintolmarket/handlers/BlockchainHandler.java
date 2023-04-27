@@ -84,7 +84,6 @@ public class BlockchainHandler {
         if(file.available()>0) {
             ObjectInputStream in = new ObjectInputStream(file);
             BlockTintol b = (BlockTintol) in.readObject();
-            System.out.println("index do bloco " + b.getIndex());
             in.close();
             return b;
         }
@@ -186,6 +185,7 @@ public class BlockchainHandler {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
+            System.out.println("Blockchain has been compromised");
             throw new RuntimeException(e);
         }
         return i;

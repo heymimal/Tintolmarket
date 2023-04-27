@@ -64,7 +64,6 @@ public class ServerThread extends Thread {
 			String user = null;
 			try {
 				user = (String)inStream.readObject();
-				System.out.println("thread: depois de receber o user");
 				if (user.length() != 0){
 					outStream.writeObject(true);
 					boolean[] isconnected = auth.serverAutenticate(outStream,inStream,user);
@@ -77,7 +76,9 @@ public class ServerThread extends Thread {
 					outStream.writeObject(checkAuth);
 					connected = checkAuth;
 				}
-
+				if(connected){
+					System.out.println("Connection established!");
+				}
 				while(connected) {
 					System.out.println("Waiting for op...");
 					this.op = (Operacao)inStream.readObject();
@@ -211,7 +212,7 @@ public class ServerThread extends Thread {
 							break;
 						}case VIEW:{
 							String winename = (String) inStream.readObject();
-							String [] vervinho = wh.viewWine(winename); //needs changes - image related
+							String [] vervinho = wh.viewWine(winename);
 							if(vervinho!= null) {
 								outStream.writeObject(true);
 								outStream.writeObject(vervinho[0]);
@@ -259,14 +260,12 @@ public class ServerThread extends Thread {
 				e.printStackTrace();
 			}
 		}catch (ClassNotFoundException | IOException e1) {
-			//e1.printStackTrace();
 			connected = false;
 		}
 		System.out.println("Disconnecting...");
 		try {
 			this.socket.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

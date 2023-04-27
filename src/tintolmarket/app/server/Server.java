@@ -30,9 +30,9 @@ public class Server {
 	
 	private static final int PORT_DEFAULT = 12345;
 	public static final String users = "users.txt";
-	public static final String wines = "wines.txt";
-	public static final String wallet = "wallet.txt";
-	public static final String messages = "messages.txt";
+	public static final String wines = "wines.ser";
+	public static final String wallet = "wallet.ser";
+	public static final String messages = "messages.ser";
 
 	public static ServerSecurity auth;
 	
@@ -43,7 +43,7 @@ public class Server {
 		System.setProperty("javax.net.ssl.keyStorePassword"
 				, "keypass");
 
-		System.out.println("servidor: main tintol");
+		System.out.println("servidor: Tintolmarket");
 		Server server = new Server();
 
 		String port;
