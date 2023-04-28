@@ -1,6 +1,7 @@
 package tintolmarket.app;
 
 import java.awt.*;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import tintolmarket.app.client.ClientConector;
@@ -60,6 +61,7 @@ public class Tintolmarket{
 				case "add":{
 					String winename = sc.next();
 					String wineimage = sc.next();
+
 					System.out.println("A adicionar "+ winename + " com a imagem "+ wineimage);
 					if(!c.addwine(winename,wineimage)) {
 						System.out.println("Erro a adicionar a imagem/ Vinho já existe.");
@@ -71,8 +73,16 @@ public class Tintolmarket{
 				case "s":
 				case "sell":{
 					String winename = sc.next();
-					int winevalue = sc.nextInt();
-					int winequantity = sc.nextInt();
+					int winevalue;
+					int winequantity;
+					try {
+						winevalue = sc.nextInt();
+						winequantity = sc.nextInt();
+					} catch (InputMismatchException e){
+						System.out.println("Valor do vinho/ Quantidade têm de ser numeros!");
+						System.out.println("Por favor repita a operação do inicio!");
+						break;
+					}
 					System.out.println("Vender "+ winequantity + " unidades a "+ winevalue + " do vinho "+ winename);
 					int resposta = c.sellwine(winename,winevalue,winequantity);
 					if(resposta == -1) {
@@ -94,8 +104,15 @@ public class Tintolmarket{
 				case "buy":{
 					String winename = sc.next();
 					String wineseller = sc.next();
+					int winequantity;
+					try {
+						winequantity = sc.nextInt();
+					} catch (InputMismatchException e){
+						System.out.println("Quantidade têm de ser um numero!");
+						System.out.println("Por favor repita a operação do inicio!");
+						break;
+					}
 					//check if wineseller == username
-					int winequantity = sc.nextInt();
 					if(wineseller.equals(username)) {
 						System.out.println("Nao podes comprar a ti mesmo.");
 					} else {
@@ -122,7 +139,13 @@ public class Tintolmarket{
 				case "c":
 				case "classify":{
 					String winename = sc.next();
-					int stars = sc.nextInt();
+					int stars = 0;
+					try{
+						stars = sc.nextInt();
+					} catch (InputMismatchException e){
+						System.out.println("Estrelas têm de ser um número!");
+					}
+
 					if (stars > 5 || stars < 1) {
 						System.out.println("Estrelas tem que estar entre 1 e 5!");
 					}

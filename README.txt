@@ -45,12 +45,17 @@ Quando um vinho é visualizado (OP: VIEW) o cliente guarda a imagem do vinho num
 Quando uma operação sell ou buy é realizada, uma Transação é adicionada à blockchain, sendo a blockchain guardada na
 pasta respetiva.
 
+Os HMacs de cada ficheiro sao guardados na pasta Macs.
+
 --KEYSTORES, ALIAS E PASSWORDS--
 keystore.server - myServer - keypass
 keystore.user1 - user1 - user1pass
 keystore.user2 - user2 - user2pass
+keystore.user3 - user3 - user3pass
+keystore.user4 - user4 - user4pass
+keystore.user5 - user5 - user5pass
 
 Limitações:
-Quando o Servidor fecha, o cliente fecha com erros.
+Quando o Servidor fecha, o cliente fecha com erros / imprime a exceção.
 Não verificamos se dá para fazer a conexão entre cliente servidor através de diferentes máquinas, contudo achamos
 que está funcional.
